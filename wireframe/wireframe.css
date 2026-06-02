@@ -1,0 +1,168 @@
+/* ============================================================
+   SQM Hungary — WIREFRAME stíluslap (SZÁNDÉKOSAN arculat nélkül)
+   Cél: a szerkezet, a tartalom és a folyamat validálása.
+   Csak szürkeárnyalat, rendszerbetű, dobozok, annotációk.
+   A végleges arculat a /design mappában készül.
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+:root{
+  --line:#9aa0a6;
+  --line-strong:#5f6368;
+  --ink:#202124;
+  --muted:#5f6368;
+  --bg:#ffffff;
+  --fill:#f1f3f4;
+  --fill-2:#e8eaed;
+  --note:#3c4043;
+  --maxw:1080px;
+}
+
+html,body{ margin:0; padding:0; }
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  color:var(--ink);
+  background:#fafafa;
+  line-height:1.5;
+  font-size:16px;
+}
+
+.wf-wrap{ max-width:var(--maxw); margin:0 auto; padding:0 16px; }
+
+/* Page banner explaining this is a wireframe */
+.wf-banner{
+  background:#202124; color:#fff; text-align:center;
+  padding:10px 16px; font-size:13px; letter-spacing:.3px;
+}
+.wf-banner b{ color:#ffd037; }
+
+/* Section scaffolding */
+.wf-section{
+  border:1px solid var(--line);
+  background:var(--bg);
+  margin:18px auto;
+  max-width:var(--maxw);
+  border-radius:4px;
+}
+.wf-section > .wf-inner{ padding:22px; }
+
+/* Section label tag (top-left) */
+.wf-tag{
+  display:inline-block;
+  background:var(--fill-2);
+  border:1px solid var(--line);
+  border-radius:3px;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+  color:var(--note);
+  padding:3px 8px;
+  margin:0 0 12px;
+  font-weight:700;
+}
+
+/* Annotations — explain intent / measurement / behaviour */
+.wf-note{
+  border-left:3px solid var(--line-strong);
+  background:#fffef2;
+  color:var(--note);
+  font-size:13px;
+  padding:8px 12px;
+  margin:12px 0;
+}
+.wf-note::before{ content:"📝 megjegyzés: "; font-weight:700; }
+
+h1,h2,h3,h4{ font-weight:700; line-height:1.2; margin:.2em 0 .4em; }
+h1{ font-size:30px; }
+h2{ font-size:23px; }
+h3{ font-size:18px; }
+p{ margin:.4em 0; max-width:62ch; }
+.muted{ color:var(--muted); }
+small{ color:var(--muted); }
+
+/* Placeholder boxes for images */
+.wf-img{
+  border:2px dashed var(--line-strong);
+  background:
+    repeating-linear-gradient(45deg,#fff,#fff 10px,#f1f3f4 10px,#f1f3f4 20px);
+  color:var(--note);
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:14px; font-size:13px; border-radius:4px; min-height:90px;
+}
+.wf-img b{ display:block; font-size:13px; }
+.wf-img .ar{ font-size:11px; color:var(--muted); margin-top:4px; }
+.wf-img.real{ border-style:solid; border-color:#1a7f37; background:#eef7f0; }
+.wf-img.ai{ border-color:#9a6700; background:#fff8e6; }
+
+/* Buttons (no styling — just outlined boxes) */
+.wf-btn{
+  display:inline-block; border:2px solid var(--ink); border-radius:4px;
+  padding:10px 16px; font-weight:700; font-size:14px; margin:6px 8px 6px 0;
+  background:#fff; color:var(--ink);
+}
+.wf-btn.primary{ background:var(--ink); color:#fff; }
+.wf-btn.block{ display:block; width:100%; text-align:center; }
+
+/* Generic layout helpers */
+.row{ display:flex; gap:18px; flex-wrap:wrap; }
+.row > *{ flex:1 1 0; min-width:220px; }
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.grid-8{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media(max-width:780px){
+  .grid-2,.grid-3,.grid-4,.grid-8{ grid-template-columns:1fr 1fr; }
+  .row{ flex-direction:column; }
+}
+@media(max-width:520px){
+  .grid-2,.grid-3,.grid-4,.grid-8{ grid-template-columns:1fr; }
+}
+
+.card{
+  border:1px solid var(--line);
+  border-radius:4px;
+  padding:14px;
+  background:#fff;
+}
+.chip{
+  display:inline-block; border:1px solid var(--line); border-radius:999px;
+  padding:4px 10px; font-size:12px; margin:3px; background:#fff;
+}
+
+/* Header (wireframe) */
+.wf-header{
+  border:1px solid var(--line); background:#fff; border-radius:4px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 18px; max-width:var(--maxw); margin:18px auto 0;
+}
+.wf-logo{ border:1px solid var(--line); padding:8px 14px; font-weight:800; border-radius:3px; }
+.wf-nav a{ color:var(--ink); text-decoration:none; margin:0 8px; font-size:13px; }
+
+/* Form steps */
+.wf-step{
+  border:1px solid var(--line); border-radius:4px; padding:14px; margin:10px 0;
+  background:#fff;
+}
+.wf-step .step-no{
+  display:inline-block; background:var(--ink); color:#fff; border-radius:999px;
+  width:24px; height:24px; line-height:24px; text-align:center; font-size:12px; font-weight:700;
+  margin-right:8px;
+}
+.wf-input{
+  border:1px solid var(--line-strong); border-radius:4px; padding:10px 12px;
+  background:#fff; color:var(--muted); font-size:14px; margin-top:6px;
+}
+.wf-progress{ height:10px; border:1px solid var(--line-strong); border-radius:999px; background:#fff; overflow:hidden; margin:6px 0 14px; }
+.wf-progress > span{ display:block; height:100%; width:18%; background:var(--line-strong); }
+
+ul.tight{ margin:.3em 0; padding-left:1.1em; }
+ul.tight li{ margin:.2em 0; }
+
+footer.wf-footer{ color:var(--muted); font-size:13px; text-align:center; padding:26px 16px 40px; }
+
+.legend{ font-size:12px; color:var(--muted); display:flex; gap:16px; flex-wrap:wrap; justify-content:center; padding:6px 0; }
+.legend span{ display:inline-flex; align-items:center; gap:6px; }
+.sw{ width:14px; height:14px; border-radius:3px; display:inline-block; border:2px dashed var(--line-strong); }
+.sw.real{ border-style:solid; border-color:#1a7f37; background:#eef7f0; }
+.sw.ai{ border-color:#9a6700; background:#fff8e6; }
