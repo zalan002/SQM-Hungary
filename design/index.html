@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ipari padló ajánlat — Műgyanta padló minimális leállással | SQM Hungary</title>
+<meta name="description" content="Műgyanta ipari padlók gyártóüzemekre: epoxi, PU, PU-cement, PMMA. 48–72 órás visszaállás, 3 év jótállás, ISO-alapú minőség. Kérjen kötelezettségmentes ajánlatot — 48 órán belül válaszolunk!">
+<link rel="icon" href="assets/img/brand/favicon.png">
+
+<!-- Open Graph (FB linkelőnézet) — éles OG-kép: AI-01, lásd 02-kepigeny-tablazat.md -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Ipari padló minimális leállással — SQM Hungary">
+<meta property="og:description" content="Gyártóüzemekre tervezett műgyanta padlók, 48–72 órás visszaállással. Kérjen ajánlatot!">
+<meta property="og:image" content="assets/img/ai/AI-01.webp">
+
+<link rel="stylesheet" href="assets/css/style.css">
+
+<!-- A SITE_CONFIG-ot felülírhatod itt; egyébként az app.js alapértelmezést használ. -->
+<script>
+  window.SITE_CONFIG = {
+    META_PIXEL_ID: "",                 /* éles Pixel ID ide */
+    API_LEAD_PATH: "/api/lead",
+    THANK_YOU_PATH: "koszonjuk-ajanlat/",   /* éles: "/koszonjuk-ajanlat" */
+    LEAD_SOURCE: "leadgen-fb-ipari-padlo",
+    LEAD_SOURCE_PARTIAL: "leadgen-fb-ipari-padlo-partial",
+    PIXEL_CONTENT_NAME: "SQM Hungary ipari padló ajánlatkérés",
+    PIXEL_CONTENT_CATEGORY: "facebook-b2b-leadgen-flooring",
+    DEMO_MODE: false                   /* élesítve: az űrlap a /api/lead végpontra küld */
+  };
+</script>
+</head>
+<body>
+
+<!-- ============ FEJLÉC ============ -->
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#" aria-label="SQM Hungary"><img src="assets/img/brand/SQMlogo.png" alt="SQM Hungary logó"></a>
+    <nav class="nav" id="nav">
+      <a href="#szolgaltatasok">Szolgáltatások</a>
+      <a href="#miert">Miért az SQM?</a>
+      <a href="#referenciak">Referenciák</a>
+      <a href="#szektorok">Szektorok</a>
+    </nav>
+    <div class="header-actions">
+      <a class="header-phone" href="tel:+36202088779">📞 06 20 208 8779</a>
+      <a class="btn btn--yellow" href="#ajanlatkero">Ajánlatkérés</a>
+      <button class="nav-toggle" aria-label="Menü" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      <div class="hero-badges">
+        <span class="badge">Gyártóüzemekre tervezve</span>
+        <span class="badge">48–72 órás visszaállás</span>
+        <span class="badge">3 év jótállás</span>
+      </div>
+      <h1>Műgyanta ipari padlók — minimális leállással</h1>
+      <p class="lead">Nehézgép-, vegyszer- és targoncaterhelésre méretezett epoxi, PU, PU-cement
+        és PMMA rendszerek. Ütemezett kivitelezés, hogy a termelés gyorsan újrainduljon.</p>
+      <ul class="hero-checks">
+        <li><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> ISO-alapú minőségbiztosítás, élelmiszeripari &amp; egészségügyi megfelelés</li>
+        <li><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Egyedi, forintra kalkulált ár — nem sablon-négyzetméteráras</li>
+        <li><svg class="ic" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Országos kivitelezés, multinacionális ügyfelek bizalma</li>
+      </ul>
+      <div class="hero-cta">
+        <a class="btn btn--lg" href="#ajanlatkero">Kérek ajánlatot — 48h válasz</a>
+        <a class="btn btn--ghost btn--lg" href="#folyamat">Hogyan dolgozunk?</a>
+      </div>
+      <p class="hero-trust">Continental · Foxconn · Jabil · NI Hungary · Schaeffler — bennünket választottak</p>
+    </div>
+    <div class="hero-form reveal" id="ajanlatkero">
+      <div class="lead-card">
+        <h2 class="lead-card-title">Kérjen ipari padló ajánlatot</h2>
+        <p class="lead-card-sub">48 órán belül válaszolunk műszaki javaslattal és becsült költséggel.</p>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="progress-label" id="progress-label">Csak néhány kérdés — kb. 30 másodperc.</div>
+        <form id="lead-form" novalidate>
+          <input type="text" name="website" id="lf-hp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div id="form-step"><!-- a lépéseket az app.js rendereli --></div>
+          <p class="form-err" id="form-err" role="alert"></p>
+          <div class="form-nav">
+            <button type="button" class="btn btn--ghost" id="form-back" style="visibility:hidden">‹ Vissza</button>
+            <button type="submit" class="btn" id="form-next">Tovább</button>
+          </div>
+          <p class="form-foot">🔒 Adatait bizalmasan kezeljük. A küldéssel elfogadja az
+            <a href="#">Adatkezelési tájékoztatót</a>.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PARTNEREK ============ -->
+<section class="partners">
+  <div class="wrap">
+    <div class="label">Bennünket választottak</div>
+    <div class="partners-logos">
+      <img src="assets/img/brand/partners/continental.svg" alt="Continental" loading="lazy">
+      <img src="assets/img/brand/partners/foxconn.svg" alt="Foxconn" loading="lazy">
+      <img src="assets/img/brand/partners/jabil.svg" alt="Jabil" loading="lazy">
+      <img src="assets/img/brand/partners/ni.svg" alt="NI Hungary" loading="lazy">
+      <img src="assets/img/brand/partners/schaeffler.svg" alt="Schaeffler" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ============ USP SÁV ============ -->
+<section class="section tight">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat reveal">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <b>48–72 h</b><small>visszaállás, ütemezetten</small>
+      </div>
+      <div class="stat reveal">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7z"/></svg>
+        <b>3 év</b><small>kivitelezői jótállás</small>
+      </div>
+      <div class="stat reveal">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+        <b>ISO-alapú</b><small>minőségbiztosítás (HACCP/ESD)</small>
+      </div>
+      <div class="stat reveal">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <b>Forintra</b><small>egyedileg kalkulált ár</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MIÉRT AZ SQM ============ -->
+<section class="section section--soft" id="miert">
+  <div class="wrap why-grid">
+    <div class="why-media reveal">
+      <img src="assets/img/foto/folyamat-elsimitas.webp" alt="SQM szakember műgyanta padlót simít egy gyártóüzemben">
+    </div>
+    <div>
+      <span class="eyebrow">Miért az SQM?</span>
+      <h2>Nem klasszikus építőipar — mérnöki precizitás</h2>
+      <p class="lead">Igényes gyártóüzemek partnere vagyunk: kulturált kivitelezés, átlátható
+        kommunikáció és a multinacionális ügyfelek által elvárt rendszerek.</p>
+
+      <div class="feature reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M10 2v6L4 20a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2L14 8V2"/><path d="M8 2h8"/></svg></div>
+        <div><h3>Speciális anyagok</h3><p>Epoxi mellett PU-cement és PMMA rendszerek — amit kevés hazai kivitelező kínál.</p></div>
+      </div>
+      <div class="feature reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></div>
+        <div><h3>Gyártófüggetlenség</h3><p>Nem kötődünk egyetlen anyaggyártóhoz sem — mindig a projektre optimális rendszert választjuk.</p></div>
+      </div>
+      <div class="feature reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div><h3>Egyedi, forintra kalkulált ajánlat</h3><p>Nem sablon-négyzetméteráras — reális, gyakran kedvezőbb árat ad.</p></div>
+      </div>
+      <div class="feature reveal">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+        <div><h3>Kulturált, megbízható csapat</h3><p>Tiszta munkaterület, pontos ütemezés, professzionális megjelenés a helyszínen.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SZOLGÁLTATÁSOK ============ -->
+<section class="section" id="szolgaltatasok">
+  <div class="wrap center">
+    <div class="section-head">
+      <span class="eyebrow">Szolgáltatásaink</span>
+      <h2>Ipari padlórendszerek minden terhelésre</h2>
+      <p class="lead">A felmérés alapján a területre optimális rendszert ajánljuk — a tartós műgyantától a speciális PU-cementig.</p>
+    </div>
+    <div class="grid grid-3" style="text-align:left">
+      <article class="card reveal">
+        <div class="card-media"><img src="assets/img/foto/folyamat-onterules.webp" alt="Műgyanta önterülő padló"></div>
+        <div class="card-body">
+          <h3>Műgyanta padló</h3>
+          <ul><li>Repedésáthidaló rendszerek</li><li>Vegyi ellenállás, nagy terhelés</li><li>Csúszásmentesítés — egyedi szemcsézés</li></ul>
+          <div class="card-foot"><a class="btn btn--ghost" href="#ajanlatkero">Ajánlatkérés</a><span class="badge-48">48h válasz</span></div>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card-media"><img src="assets/img/ai/AI-02.webp" alt="PU-cement bevonat ipari padló" loading="lazy"></div>
+        <div class="card-body">
+          <h3>PU-cement bevonat</h3>
+          <ul><li>Gyors kivitelezés üzemszünet nélkül</li><li>Kopásálló, könnyen tisztítható felület</li><li>Élelmiszeripari / egészségügyi megfelelés</li></ul>
+          <div class="card-foot"><a class="btn btn--ghost" href="#ajanlatkero">Ajánlatkérés</a><span class="badge-48">48h válasz</span></div>
+        </div>
+      </article>
+      <article class="card reveal">
+        <div class="card-media"><img src="assets/img/ai/AI-03.webp" alt="Ipari padló repedés- és hibajavítás" loading="lazy"></div>
+        <div class="card-body">
+          <h3>Repedés- és hibajavítás</h3>
+          <ul><li>Dilatációk, kipergések, lokális hibák</li><li>Gyors kötés — minimális leállás</li><li>Higiénikus, esztétikus végeredmény</li></ul>
+          <div class="card-foot"><a class="btn btn--ghost" href="#ajanlatkero">Ajánlatkérés</a><span class="badge-48">48h válasz</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOLYAMAT ============ -->
+<section class="section section--soft" id="folyamat">
+  <div class="wrap center">
+    <div class="section-head">
+      <span class="eyebrow">Hogyan dolgozunk</span>
+      <h2>A felméréstől az üzemátadásig — kiszámíthatóan</h2>
+    </div>
+    <div class="steps" style="text-align:left">
+      <div class="step reveal"><div class="num">1</div><h3>Felmérés</h3><p>30–45 perces helyszíni vagy online egyeztetés, a terhelés és az igények feltérképezése.</p></div>
+      <div class="step reveal"><div class="num">2</div><h3>Egyedi ajánlat</h3><p>48 órán belül műszaki javaslat és forintra kalkulált, kötelezettségmentes árbecslés.</p></div>
+      <div class="step reveal"><div class="num">3</div><h3>Ütemezett kivitelezés</h3><p>A termelés köré tervezve — igény szerint hétvégi vagy éjszakai műszakban.</p></div>
+      <div class="step reveal"><div class="num">4</div><h3>Üzemátadás</h3><p>48–72 órás visszaállás, dokumentált minőség és 3 év kivitelezői jótállás.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REFERENCIÁK / ESETTANULMÁNYOK ============ -->
+<section class="section" id="referenciak">
+  <div class="wrap center">
+    <div class="section-head">
+      <span class="eyebrow">Esettanulmányok</span>
+      <h2>Valós ipari projektek — előtte / utána</h2>
+      <p class="lead">Húzza el a csúszkát, és nézze meg a különbséget. Kiindulás, megoldás, eredmény — röviden.</p>
+    </div>
+
+    <div class="cases">
+      <!-- 1 -->
+      <article class="case reveal">
+        <div class="case-media">
+          <div class="ba" data-ba style="--pos:50%">
+            <img class="ba-after" src="assets/img/cases/01-utana.jpg" alt="Élelmiszeripari PU-cement padló — utána" loading="lazy">
+            <img class="ba-before" src="assets/img/cases/01-elotte.jpg" alt="Élelmiszeripari padló — előtte" loading="lazy">
+            <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Előtte / utána csúszka">
+            <span class="ba-handle" aria-hidden="true"></span>
+            <span class="ba-label ba-label-before">Előtte</span>
+            <span class="ba-label ba-label-after">Utána</span>
+          </div>
+        </div>
+        <div class="case-content">
+          <h3>PU-cement padló — élelmiszeripari tér (Győr)</h3>
+          <div class="case-tags">
+            <span>1 200 m²</span><span>48 óra</span><span>R10 csúszásmentes</span><span>hétvégi ablak</span><span>3 év garancia</span>
+          </div>
+          <p>48 órás hétvégi ablakban kiépített, egyrétegű önterülő PU-cement (SL) rendszer:
+            vegyszeres mélytisztítás, párazáró/olajstabil primer, majd a PU-cement réteg.
+            Átadás hétfő reggelre — a termelés zökkenőmentesen indulhatott újra.</p>
+          <a class="btn btn--ghost" href="#ajanlatkero">Hasonlót kérek</a>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="case reveal">
+        <div class="case-media">
+          <div class="ba" data-ba style="--pos:50%">
+            <img class="ba-after" src="assets/img/cases/02-utana.jpg" alt="ESD műgyanta padló — utána" loading="lazy">
+            <img class="ba-before" src="assets/img/cases/02-elotte.jpg" alt="Elektronikai üzem padlója — előtte" loading="lazy">
+            <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Előtte / utána csúszka">
+            <span class="ba-handle" aria-hidden="true"></span>
+            <span class="ba-label ba-label-before">Előtte</span>
+            <span class="ba-label ba-label-after">Utána</span>
+          </div>
+        </div>
+        <div class="case-content">
+          <h3>ESD műgyanta padló — elektronikai üzem (Budapest)</h3>
+          <div class="case-tags">
+            <span>860 m²</span><span>4 nap</span><span>ESD-vezetőképes</span><span>részleges leállás</span><span>3 év garancia</span>
+          </div>
+          <p>Ellenőrzött, vezetőképes (ESD) műgyanta rendszer kiépítése elektronikai
+            gyártóüzemben — mérési jegyzőkönyvvel igazolt vezetőképességgel, a termelés
+            részleges leállása mellett.</p>
+          <a class="btn btn--ghost" href="#ajanlatkero">Hasonlót kérek</a>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="case reveal">
+        <div class="case-media">
+          <div class="ba" data-ba style="--pos:50%">
+            <img class="ba-after" src="assets/img/cases/03-utana.jpg" alt="Logisztikai PU vékonybevonat — utána" loading="lazy">
+            <img class="ba-before" src="assets/img/cases/03-elotte.jpg" alt="Logisztikai csarnok padlója — előtte" loading="lazy">
+            <input class="ba-range" type="range" min="0" max="100" value="50" aria-label="Előtte / utána csúszka">
+            <span class="ba-handle" aria-hidden="true"></span>
+            <span class="ba-label ba-label-before">Előtte</span>
+            <span class="ba-label ba-label-after">Utána</span>
+          </div>
+        </div>
+        <div class="case-content">
+          <h3>PU vékonybevonat — logisztikai csarnok (Budafok)</h3>
+          <div class="case-tags">
+            <span>1 600 m²</span><span>3 nap</span><span>selyemfényű</span><span>0 leállás (szekciókban)</span><span>2 év garancia</span>
+          </div>
+          <p>Vegyszeres mélytisztítás, majd 1–2 réteg PU vékonybevonat, szekcionált
+            kivitelezéssel — így a logisztikai üzem működése egy pillanatra sem állt le.
+            Selyemfényű, könnyen tisztítható végeredmény.</p>
+          <a class="btn btn--ghost" href="#ajanlatkero">Hasonlót kérek</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SZEKTOROK ============ -->
+<section class="section section--soft" id="szektorok">
+  <div class="wrap center">
+    <div class="section-head">
+      <span class="eyebrow">Szektorok</span>
+      <h2>Iparági megfelelőségek</h2>
+      <p class="lead">HACCP, ESD, csúszásmentesség, vegyi ellenállás és gyors üzemátadás — szektorra szabva.</p>
+    </div>
+    <div class="sectors-grid">
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M4 3v18M4 8h6M16 3c-1 3-1 6 0 9v9"/></svg></div><b>Élelmiszeripar</b><small>HACCP</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg></div><b>Logisztika / Raktár</b><small>targoncaterhelés</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M4 20h16M6 20V10l5 3V8l5 3V6"/></svg></div><b>Gyártás / ESD</b><small>vezetőképes</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M10 2h4v6l5 9a3 3 0 0 1-3 4H8a3 3 0 0 1-3-4l5-9V2z"/></svg></div><b>Gyógyszeripar</b><small>tisztatér</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></div><b>Egészségügy</b><small>higiénia</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg></div><b>Vegyipar</b><small>vegyszerálló</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M3 13l2-5a3 3 0 0 1 3-2h8a3 3 0 0 1 3 2l2 5v5h-3M3 13v5h3M6 18h12"/><circle cx="7.5" cy="16.5" r="1.5"/><circle cx="16.5" cy="16.5" r="1.5"/></svg></div><b>Autóipar</b><small>nagy terhelés</small></div>
+      <div class="sector reveal"><div class="ic"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#1A1A1A" stroke-width="1.8"><path d="M3 21V8l7-4 7 4v13M3 21h18M9 21v-5h4v5"/></svg></div><b>Könnyűipar</b><small>általános</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ŰRLAP ============ -->
+<section class="section form-section" id="ajanlatkero-info">
+  <div class="wrap form-grid">
+    <div class="form-intro">
+      <span class="eyebrow">Ajánlatkérés</span>
+      <h2>Néhány kérdés — és intézzük is</h2>
+      <p class="lead">Töltse ki a fenti űrlapot, és 48 órán belül válaszolunk műszaki
+        javaslattal és becsült költséggel — kötelezettségmentesen.</p>
+      <ul class="why-now" style="list-style:none; padding:18px 20px; margin-top:8px;">
+        <li>✓ Ingyenes, kötelezettségmentes felmérés</li>
+        <li>✓ 48 órás műszaki visszajelzés</li>
+        <li>✓ Forintra kalkulált, reális árbecslés</li>
+      </ul>
+      <div class="form-cta">
+        <a class="btn btn--yellow btn--lg" href="#ajanlatkero">Ugrás az ajánlatkérőhöz ↑</a>
+        <a class="btn btn--ghost btn--lg" href="tel:+36202088779" style="color:#fff;border-color:#fff;">📞 06 20 208 8779</a>
+      </div>
+    </div>
+
+    <div class="form-media reveal">
+      <img src="assets/img/foto/folyamat-onterules.webp" alt="Önterülő műgyanta padló kivitelezése ipari üzemben" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ============ GYIK ============ -->
+<section class="section">
+  <div class="wrap center">
+    <div class="section-head"><span class="eyebrow">GYIK</span><h2>Gyakori kérdések</h2></div>
+    <div class="faq" style="text-align:left">
+      <details><summary>Mennyi leállással jár a kivitelezés?</summary><div class="faq-body">Ütemezett munkavégzéssel dolgozunk, jellemzően 48–72 órás visszaállással. Igény szerint hétvégi vagy éjszakai műszakban végezzük a munkát, hogy a termelés minél előbb újrainduljon.</div></details>
+      <details><summary>Van minimum terület, amire vállalkoznak?</summary><div class="faq-body">Kifejezetten ipari projektekre specializálódtunk (gyártóüzemek, raktárak, élelmiszer- és gyógyszeripari létesítmények). A pontos terjedelmet a felmérésen egyeztetjük; lakossági munkát nem vállalunk.</div></details>
+      <details><summary>Milyen jótállást adnak?</summary><div class="faq-body">3 év kivitelezői jótállást biztosítunk, ISO-alapú minőségbiztosítással és dokumentált munkafolyamattal.</div></details>
+      <details><summary>Milyen anyagokkal dolgoznak?</summary><div class="faq-body">Epoxi, PU, PU-cement és PMMA rendszerekkel — gyártófüggetlenül. Mindig a projektre optimális anyagot választjuk az ár és a műszaki igények alapján.</div></details>
+      <details><summary>Hogyan néz ki az árajánlat?</summary><div class="faq-body">Nem sablon-négyzetméteráras becslést adunk: minden ajánlatot egyedileg, forintra kalkulálunk, így reális és gyakran kedvezőbb árat kap.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ZÁRÓ CTA ============ -->
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Kérjen kötelezettségmentes ajánlatot</h2>
+    <p style="color:#2a2a2a; font-weight:600;">48 órán belül válaszolunk műszaki javaslattal és becsült költséggel.</p>
+    <a class="btn btn--lg" href="#ajanlatkero">Ajánlatkérés indítása</a>
+    <a class="btn btn--ghost btn--lg" href="tel:+36202088779">📞 06 20 208 8779</a>
+  </div>
+</section>
+
+<!-- ============ LÁBLÉC ============ -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <img src="assets/img/brand/SQMlogo.png" alt="SQM Hungary">
+        <p>Műgyanta ipari padlók gyártóüzemekre — minimális leállással, országos kivitelezéssel.</p>
+      </div>
+      <div>
+        <h4>Szolgáltatások</h4>
+        <a href="#szolgaltatasok">Műgyanta padló</a>
+        <a href="#szolgaltatasok">PU-cement bevonat</a>
+        <a href="#szolgaltatasok">Repedés- és hibajavítás</a>
+      </div>
+      <div>
+        <h4>Kapcsolat</h4>
+        <a href="tel:+36202088779">📞 06 20 208 8779</a>
+        <a href="mailto:info@sqm-hungary.hu">✉️ info@sqm-hungary.hu</a>
+      </div>
+      <div>
+        <h4>Jogi</h4>
+        <a href="#">Adatkezelési tájékoztató</a>
+        <a href="#">Impresszum</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 SQM Hungary Kft. Minden jog fenntartva.</span>
+      <span>Ipari padlók — minimális leállással.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>
