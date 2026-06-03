@@ -110,6 +110,7 @@
   ];
 
   var state = { nev:"", email:"", telefon:"", ceg:"", szektor:"", terulet:"" };
+  function honeypot(){ var el = document.getElementById("lf-hp"); return el ? el.value : ""; }
   var stepIndex = 0, submitting = false, partialSent = false;
   var eventId = generateEventId();
 
@@ -188,7 +189,7 @@
     if (partialSent) return; partialSent = true;
     var body = {
       nev: state.nev, email: state.email, telefon: state.telefon,
-      ceg: "", szektor: "", terulet: "",
+      ceg: "", szektor: "", terulet: "", hp: honeypot(),
       forras: CFG.LEAD_SOURCE_PARTIAL, partial: true,
       beerkezett: new Date().toISOString(),
       event_id: generateEventId(),
@@ -206,7 +207,7 @@
     elNext.setAttribute("disabled", "disabled"); elErr.textContent = "";
     var body = {
       nev: state.nev, email: state.email, telefon: state.telefon,
-      ceg: state.ceg, szektor: state.szektor, terulet: state.terulet,
+      ceg: state.ceg, szektor: state.szektor, terulet: state.terulet, hp: honeypot(),
       forras: CFG.LEAD_SOURCE,
       beerkezett: new Date().toISOString(),
       event_id: eventId,

@@ -135,6 +135,15 @@ p{ margin:0 0 1em; color:var(--muted); }
 .hero-media .float-card b{ font-family:var(--display); font-size:22px; }
 .hero-media .float-card small{ color:var(--muted-2); }
 
+/* Hero-beli ajánlatkérő űrlap (a kép helyén) */
+.hero-form{ scroll-margin-top:90px; }
+.lead-card-title{ font-family:var(--display); font-size:23px; margin:0 0 4px; }
+.lead-card-sub{ color:var(--muted-2); font-size:14.5px; margin:0 0 16px; }
+.form-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; }
+.form-media img{ width:100%; border-radius:var(--radius); box-shadow:var(--shadow); aspect-ratio:4/3; object-fit:cover; }
+/* Honeypot mező — vizuálisan rejtett, csak botok töltik ki */
+.hp-field{ position:absolute !important; left:-9999px !important; top:auto; width:1px; height:1px; opacity:0; pointer-events:none; }
+
 /* ---------- Partners ---------- */
 .partners{ padding:34px 0; background:#fff; border-bottom:1px solid var(--line); }
 .partners .label{ text-align:center; font-family:var(--display); font-size:13px; letter-spacing:1.6px; text-transform:uppercase; color:var(--muted-2); margin-bottom:18px; }

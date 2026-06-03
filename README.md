@@ -66,14 +66,14 @@ köszönőoldalra).
 
 ## Kép-stratégia (fontos)
 
-- **Valós fotókat** használunk, ahol van: a `web-optimalizalt/` mappa egy élelmiszeripari
-  üzem műgyanta-padló kiépítésének fotóiból, illetve a weboldalról letöltött képekből.
-- Ahol **új kép kell**, ott a designban **placeholder** áll (`AI-01` … `AI-05`), és a pontos
-  specifikáció — *mit ábrázoljon, milyen képaránnyal, kész AI-prompttal* — a
-  [`docs/02-kepigeny-tablazat.md`](docs/02-kepigeny-tablazat.md) táblázatban van, **képenként
-  külön sorban**.
-- A **referencia-logók** (Continental, Foxconn, Jabil, NI Hungary, Schaeffler) védjegyzettek
-  → **nem AI-val** készülnek; az ügyféltől bekérendők. A designban placeholder jelzi a helyük.
+- **Valós fotók** ahol van: a `web-optimalizalt/` mappa egy élelmiszeripari üzem műgyanta-padló
+  kiépítésének fotóiból, illetve a weboldalról letöltött képekből (`design/assets/img/foto/`).
+- **AI-képek beépítve:** a megrendelő által generált képek (`Generált képek/` → bemásolva
+  `design/assets/img/ai/AI-01…AI-10.webp`) a helyükre kerültek (OG-kép, PU-cement és
+  repedésjavítás szolgáltatáskártya, esettanulmány-képek, köszönőoldal). A specifikáció:
+  [`docs/02-kepigeny-tablazat.md`](docs/02-kepigeny-tablazat.md).
+- **Referencia-logók:** a Continental, Foxconn, Jabil, NI, Schaeffler logók beépítve
+  (`design/assets/img/brand/partners/`, forrás: Wikimedia Commons, szürkeárnyalatos megjelenítés).
 
 ---
 
@@ -85,20 +85,29 @@ köszönőoldalra).
 
 ---
 
-## Backend / mérés (külön fázis)
+## Backend / mérés (ÉLES)
 
-A frontend a [`BACKEND.md`](BACKEND.md) pipeline-jára van előkészítve: a `SITE_CONFIG` és a
-`/api/lead` interfész adott, az űrlap a Meta Pixel + Conversions API közös `event_id`-os
-mérésre és az n8n lead-továbbításra van felépítve (telefon utáni részleges mentés, köszönőoldal
-`?nev=`). Élesítéshez szükséges: a `META_PIXEL_ID` beállítása, a `DEMO_MODE=false`, valamint az
-`api/lead.js` serverless függvény + env-változók a `BACKEND.md` szerint.
+A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
+
+- **`api/lead.js`** (Vercel serverless) — validáció → Meta Conversions API (`Lead` / telefon
+  után `LeadPartial`) → n8n lead-továbbítás. Kliens Pixel + szerver CAPI **közös `event_id`** → dedup.
+- **`DEMO_MODE = false`** a `design/index.html`-ben (az űrlap valódi `/api/lead` hívást küld).
+- **Honeypot** anti-spam mező a formban.
+- **Env változók + élesítési checklist:** [`docs/03-vercel-env.md`](docs/03-vercel-env.md),
+  sablon: [`.env.example`](.env.example).
+
+> A Meta **Pixel ID** kliensoldali (a `SITE_CONFIG`-ban, mindkét HTML-ben kell beírni) — lásd a
+> `docs/03-vercel-env.md` 2. pontját. A `/api`-t a `vercel.json` külön átengedi a rewrite alól.
 
 ---
 
-## Következő lépések / mire van szükség az ügyféltől
+## Következő lépések / nyitott pontok
 
-1. **Wireframe jóváhagyása** (szerkezet/tartalom) — utána véglegesíthető a design.
-2. **Referencia-logók** (átlátszó PNG/SVG) és a vektoros SQM-logó-variánsok / brand-kézikönyv.
-3. **AI-képek legenerálása** a `docs/02-kepigeny-tablazat.md` alapján (vagy valós fotók helyettük).
-4. **Esettanulmányok végleges szövege** (kiindulás → megoldás → eredmény, m², üzemátadási idő).
-5. **Backend élesítése** (Meta Pixel ID, CAPI token, n8n webhook) a `BACKEND.md` szerint.
+1. **Vercel env változók beállítása** + Pixel ID a `SITE_CONFIG`-ban → lásd
+   [`docs/03-vercel-env.md`](docs/03-vercel-env.md). (Enélkül az űrlap működik, de a Pixel/CAPI
+   nem mér és nincs n8n-továbbítás.)
+2. **Esettanulmányok** — az ügyfél küldi a végleges infókat (szöveg + esetleg saját fotók);
+   a szekció addig ideiglenes szöveggel és az AI-04/AI-05 képekkel áll.
+3. **Production (main):** a javítások a `claude/zen-cerf-Lc2gf` ágon vannak; a production
+   domainhez `main`-be kell mergelni (külön jóváhagyással).
+4. (Opcionális) Adatkezelési tájékoztató / Impresszum oldalak linkelése a láblécben.

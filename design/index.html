@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Ipari padló minimális leállással — SQM Hungary">
 <meta property="og:description" content="Gyártóüzemekre tervezett műgyanta padlók, 48–72 órás visszaállással. Kérjen ajánlatot!">
-<meta property="og:image" content="assets/img/placeholder/AI-01.svg">
+<meta property="og:image" content="assets/img/ai/AI-01.webp">
 
 <link rel="stylesheet" href="assets/css/style.css">
 
@@ -25,7 +25,7 @@
     LEAD_SOURCE_PARTIAL: "leadgen-fb-ipari-padlo-partial",
     PIXEL_CONTENT_NAME: "SQM Hungary ipari padló ajánlatkérés",
     PIXEL_CONTENT_CATEGORY: "facebook-b2b-leadgen-flooring",
-    DEMO_MODE: true                    /* ÉLESBEN: false */
+    DEMO_MODE: false                   /* élesítve: az űrlap a /api/lead végpontra küld */
   };
 </script>
 </head>
@@ -72,10 +72,23 @@
       </div>
       <p class="hero-trust">Continental · Foxconn · Jabil · NI Hungary · Schaeffler — bennünket választottak</p>
     </div>
-    <div class="hero-media reveal">
-      <img src="assets/img/foto/folyamat-onterules.webp" alt="Önterülő műgyanta padló kivitelezése ipari üzemben">
-      <div class="float-card">
-        <div><b>48h</b><small>műszaki válasz</small></div>
+    <div class="hero-form reveal" id="ajanlatkero">
+      <div class="lead-card">
+        <h2 class="lead-card-title">Kérjen ipari padló ajánlatot</h2>
+        <p class="lead-card-sub">48 órán belül válaszolunk műszaki javaslattal és becsült költséggel.</p>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="progress-label" id="progress-label">Csak néhány kérdés — kb. 30 másodperc.</div>
+        <form id="lead-form" novalidate>
+          <input type="text" name="website" id="lf-hp" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div id="form-step"><!-- a lépéseket az app.js rendereli --></div>
+          <p class="form-err" id="form-err" role="alert"></p>
+          <div class="form-nav">
+            <button type="button" class="btn btn--ghost" id="form-back" style="visibility:hidden">‹ Vissza</button>
+            <button type="submit" class="btn" id="form-next">Tovább</button>
+          </div>
+          <p class="form-foot">🔒 Adatait bizalmasan kezeljük. A küldéssel elfogadja az
+            <a href="#">Adatkezelési tájékoztatót</a>.</p>
+        </form>
       </div>
     </div>
   </div>
@@ -86,11 +99,11 @@
   <div class="wrap">
     <div class="label">Bennünket választottak</div>
     <div class="partners-logos">
-      <img src="assets/img/placeholder/logo-continental.svg" alt="Continental">
-      <img src="assets/img/placeholder/logo-foxconn.svg" alt="Foxconn">
-      <img src="assets/img/placeholder/logo-jabil.svg" alt="Jabil">
-      <img src="assets/img/placeholder/logo-ni.svg" alt="NI Hungary">
-      <img src="assets/img/placeholder/logo-schaeffler.svg" alt="Schaeffler">
+      <img src="assets/img/brand/partners/continental.svg" alt="Continental" loading="lazy">
+      <img src="assets/img/brand/partners/foxconn.svg" alt="Foxconn" loading="lazy">
+      <img src="assets/img/brand/partners/jabil.svg" alt="Jabil" loading="lazy">
+      <img src="assets/img/brand/partners/ni.svg" alt="NI Hungary" loading="lazy">
+      <img src="assets/img/brand/partners/schaeffler.svg" alt="Schaeffler" loading="lazy">
     </div>
   </div>
 </section>
@@ -169,7 +182,7 @@
         </div>
       </article>
       <article class="card reveal">
-        <div class="card-media"><img src="assets/img/placeholder/AI-02.svg" alt="PU-cement bevonat (placeholder — AI-02)"></div>
+        <div class="card-media"><img src="assets/img/ai/AI-02.webp" alt="PU-cement bevonat ipari padló" loading="lazy"></div>
         <div class="card-body">
           <h3>PU-cement bevonat</h3>
           <ul><li>Gyors kivitelezés üzemszünet nélkül</li><li>Kopásálló, könnyen tisztítható felület</li><li>Élelmiszeripari / egészségügyi megfelelés</li></ul>
@@ -177,7 +190,7 @@
         </div>
       </article>
       <article class="card reveal">
-        <div class="card-media"><img src="assets/img/placeholder/AI-03.svg" alt="Repedés- és hibajavítás (placeholder — AI-03)"></div>
+        <div class="card-media"><img src="assets/img/ai/AI-03.webp" alt="Ipari padló repedés- és hibajavítás" loading="lazy"></div>
         <div class="card-body">
           <h3>Repedés- és hibajavítás</h3>
           <ul><li>Dilatációk, kipergések, lokális hibák</li><li>Gyors kötés — minimális leállás</li><li>Higiénikus, esztétikus végeredmény</li></ul>
@@ -222,7 +235,7 @@
         </div>
       </article>
       <article class="card reveal">
-        <div class="card-media" style="aspect-ratio:3/2"><img src="assets/img/placeholder/AI-04.svg" alt="ESD / vezetőképes padló (placeholder — AI-04)"></div>
+        <div class="card-media" style="aspect-ratio:3/2"><img src="assets/img/ai/AI-04.webp" alt="ESD / vezetőképes ipari padló elektronikai gyártásban" loading="lazy"></div>
         <div class="card-body">
           <h3>Vezetőképes (ESD) padló — elektronikai gyártás</h3>
           <p>Földelt, ESD-kompatibilis rendszer finom összeszerelő üzemben, PVC kiváltására.</p>
@@ -230,7 +243,7 @@
         </div>
       </article>
       <article class="card reveal">
-        <div class="card-media" style="aspect-ratio:3/2"><img src="assets/img/placeholder/AI-05.svg" alt="Raktári műgyanta padló (placeholder — AI-05)"></div>
+        <div class="card-media" style="aspect-ratio:3/2"><img src="assets/img/ai/AI-05.webp" alt="Raktári / logisztikai műgyanta padló targoncával" loading="lazy"></div>
         <div class="card-body">
           <h3>280 m²-es raktári műgyanta padló</h3>
           <p>Nagy teherbírású, targoncaterhelésre méretezett padló, padlójelölésekkel.</p>
@@ -263,34 +276,26 @@
 </section>
 
 <!-- ============ ŰRLAP ============ -->
-<section class="section form-section" id="ajanlatkero">
+<section class="section form-section" id="ajanlatkero-info">
   <div class="wrap form-grid">
     <div class="form-intro">
       <span class="eyebrow">Ajánlatkérés</span>
-      <h2>Kérjen ipari padló ajánlatot</h2>
-      <p class="lead">48 órán belül válaszolunk műszaki javaslattal és becsült költséggel.
-        Néhány kérdés, és már intézzük is — kötelezettségmentesen.</p>
+      <h2>Néhány kérdés — és intézzük is</h2>
+      <p class="lead">Töltse ki a fenti űrlapot, és 48 órán belül válaszolunk műszaki
+        javaslattal és becsült költséggel — kötelezettségmentesen.</p>
       <ul class="why-now" style="list-style:none; padding:18px 20px; margin-top:8px;">
         <li>✓ Ingyenes, kötelezettségmentes felmérés</li>
         <li>✓ 48 órás műszaki visszajelzés</li>
         <li>✓ Forintra kalkulált, reális árbecslés</li>
       </ul>
-      <div class="media reveal"><img src="assets/img/foto/csapat-munka.webp" alt="SQM csapat egy gyártóüzem padlóján dolgozik"></div>
+      <div class="form-cta">
+        <a class="btn btn--yellow btn--lg" href="#ajanlatkero">Ugrás az ajánlatkérőhöz ↑</a>
+        <a class="btn btn--ghost btn--lg" href="tel:+36202088779" style="color:#fff;border-color:#fff;">📞 06 20 208 8779</a>
+      </div>
     </div>
 
-    <div class="lead-card">
-      <div class="progress"><span id="progress-bar"></span></div>
-      <div class="progress-label" id="progress-label">Csak néhány kérdés — kb. 30 másodperc.</div>
-      <form id="lead-form" novalidate>
-        <div id="form-step"><!-- a lépéseket az app.js rendereli --></div>
-        <p class="form-err" id="form-err" role="alert"></p>
-        <div class="form-nav">
-          <button type="button" class="btn btn--ghost" id="form-back" style="visibility:hidden">‹ Vissza</button>
-          <button type="submit" class="btn" id="form-next">Tovább</button>
-        </div>
-        <p class="form-foot">🔒 Adatait bizalmasan kezeljük. A küldéssel elfogadja az
-          <a href="#">Adatkezelési tájékoztatót</a>.</p>
-      </form>
+    <div class="form-media reveal">
+      <img src="assets/img/foto/folyamat-onterules.webp" alt="Önterülő műgyanta padló kivitelezése ipari üzemben" loading="lazy">
     </div>
   </div>
 </section>
