@@ -157,6 +157,29 @@ p{ margin:0 0 1em; color:var(--muted); }
 .stat b{ font-family:var(--display); font-size:30px; display:block; }
 .stat small{ color:var(--muted-2); }
 
+/* ---------- Esettanulmányok: előtte/utána csúszka ---------- */
+.cases{ display:flex; flex-direction:column; gap:48px; text-align:left; }
+.case{ display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center; }
+.case:nth-child(even) .case-media{ order:2; }
+.case-content h3{ margin:0 0 10px; }
+.case-tags{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.case-tags span{ background:var(--yellow-soft); border:1px solid #f0dca0; color:var(--ink); font-family:var(--display); font-size:12.5px; padding:6px 12px; border-radius:999px; }
+
+.ba{ position:relative; width:100%; aspect-ratio:3/2; overflow:hidden; border-radius:var(--radius-lg); box-shadow:var(--shadow); --pos:50%; user-select:none; }
+.ba img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; pointer-events:none; -webkit-user-drag:none; }
+.ba .ba-before{ clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+.ba-range{ position:absolute; inset:0; width:100%; height:100%; margin:0; padding:0; opacity:0; cursor:ew-resize; -webkit-appearance:none; appearance:none; background:transparent; }
+.ba-range::-webkit-slider-thumb{ -webkit-appearance:none; width:44px; height:100%; }
+.ba-range::-moz-range-thumb{ width:44px; height:100%; border:0; background:transparent; }
+.ba-handle{ position:absolute; top:0; bottom:0; left:var(--pos); width:3px; background:#fff; transform:translateX(-50%); box-shadow:0 0 0 1px rgba(0,0,0,.25); pointer-events:none; }
+.ba-handle::after{ content:"⟺"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:40px; height:40px; line-height:36px; text-align:center; font-size:16px; color:var(--ink); background:var(--yellow); border:2px solid var(--ink); border-radius:50%; box-shadow:var(--shadow-soft); }
+.ba-label{ position:absolute; bottom:12px; font-family:var(--display); font-size:11.5px; letter-spacing:.4px; padding:5px 11px; border-radius:999px; background:rgba(0,0,0,.6); color:#fff; pointer-events:none; }
+.ba-label-before{ left:12px; } .ba-label-after{ right:12px; }
+@media(max-width:780px){
+  .case{ grid-template-columns:1fr; gap:22px; }
+  .case:nth-child(even) .case-media{ order:0; }
+}
+
 /* ---------- Generic cards / grids ---------- */
 .grid{ display:grid; gap:22px; }
 .grid-3{ grid-template-columns:repeat(3,1fr); }

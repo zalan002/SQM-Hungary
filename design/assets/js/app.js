@@ -78,6 +78,16 @@
   if (toggle && nav) toggle.addEventListener("click", function () { nav.classList.toggle("open"); });
   document.querySelectorAll('.nav a').forEach(function(a){ a.addEventListener('click', function(){ nav && nav.classList.remove('open'); }); });
 
+  /* ---------- Előtte/utána csúszkák ---------- */
+  document.querySelectorAll("[data-ba]").forEach(function (ba) {
+    var range = ba.querySelector(".ba-range");
+    if (!range) return;
+    function update() { ba.style.setProperty("--pos", range.value + "%"); }
+    range.addEventListener("input", update);
+    range.addEventListener("change", update);
+    update();
+  });
+
   /* ---------- Reveal on scroll ---------- */
   var io = ("IntersectionObserver" in window) ? new IntersectionObserver(function (es) {
     es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });

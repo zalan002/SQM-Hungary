@@ -106,8 +106,11 @@ A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
 1. **Vercel env változók beállítása** + Pixel ID a `SITE_CONFIG`-ban → lásd
    [`docs/03-vercel-env.md`](docs/03-vercel-env.md). (Enélkül az űrlap működik, de a Pixel/CAPI
    nem mér és nincs n8n-továbbítás.)
-2. **Esettanulmányok** — az ügyfél küldi a végleges infókat (szöveg + esetleg saját fotók);
-   a szekció addig ideiglenes szöveggel és az AI-04/AI-05 képekkel áll.
+2. **Esettanulmányok** — kész: 3 db valós **előtte/utána** fotóval (interaktív csúszka),
+   az `Esettanulmányok/` mappa alapján. ⚠️ A `.docx`-ek **törzsszövege** több helyen nem a
+   mappához tartozó projektet írta le (átemelt/elcsúszott szöveg), ezért a kártyák a
+   **konzisztens adatokból** készültek (mappanév + fejléc-adatok + „Összefoglaló" sor). Ha a
+   részletes leírásokat is meg akarod jeleníteni, küldd a javított törzsszövegeket.
 3. **Production (main):** a javítások a `claude/zen-cerf-Lc2gf` ágon vannak; a production
    domainhez `main`-be kell mergelni (külön jóváhagyással).
 4. (Opcionális) Adatkezelési tájékoztató / Impresszum oldalak linkelése a láblécben.
