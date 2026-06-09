@@ -3,6 +3,7 @@
 /**
  * SQM Hungary — lead endpoint (Vercel serverless, Node 18+ runtime)
  * A BACKEND.md pipeline szerint: validáció → Meta Conversions API (CAPI) → n8n továbbítás.
+ * Emellett egy FÜGGETLEN, best-effort hívás a Partner CRM felé (az n8n flow VÁLTOZATLAN).
  * Mezők (ipari padló lead-gen): nev, email, telefon, ceg, szektor, terulet.
  * A kliens Pixel `Lead` és a szerver CAPI `Lead` KÖZÖS event_id-val megy → dedup.
  */
@@ -14,6 +15,8 @@ const CAPI_TOKEN = process.env.META_CAPI_ACCESS_TOKEN || '';
 const TEST_CODE  = process.env.META_TEST_EVENT_CODE || '';
 const N8N_URL    = process.env.N8N_WEBHOOK_URL || '';
 const N8N_SECRET = process.env.N8N_WEBHOOK_SECRET || '';
+const CRM_URL    = process.env.CRM_WEBHOOK_URL || '';
+const CRM_SECRET = process.env.CRM_WEBHOOK_SECRET || '';
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
   .split(',').map(s => s.trim()).filter(Boolean);
 
@@ -138,6 +141,90 @@ async function sendCapi(b, meta) {
   }
 }
 
+/* ---------- Partner CRM (független az n8n-től; best-effort) ----------
+ * Külön HTTP-hívás a CRM webhookra. Nem nyúl az n8n flow-hoz, nem vonja össze a hívásokat.
+ * Szabály: contact.custom KULCSOK kötöttek (^[a-z0-9_]{1,40}$, ékezet nélküli snake_case),
+ * az ÉRTÉKEK szabad szövegek. Üres értékű mező kimarad. UTM + landing_url a custom-ba is.
+ */
+const CRM_CUSTOM_KEY = /^[a-z0-9_]{1,40}$/;
+
+// Form-mező -> CRM contact.custom kulcs (ékezet nélküli snake_case).
+const CRM_CUSTOM_FIELD_MAP = { szektor: 'szektor', terulet: 'terulet' };
+
+// Forrás-attribúció: a CRM ezeket "tracking" mezőként kezeli (csak operátor/admin látja).
+const CRM_TRACKING_KEYS = [
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+  'fbclid', 'gclid', 'landing_url'
+];
+
+function crmStr(v) {
+  if (v === undefined || v === null) return '';
+  return String(v).trim();
+}
+
+// contact.custom = a form egyedi mezői + tracking (UTM + landing_url).
+// Csak szabályos kulcs és nem üres érték kerül be.
+function buildCrmCustom(b, a) {
+  const out = {};
+  for (const formKey in CRM_CUSTOM_FIELD_MAP) {
+    const crmKey = CRM_CUSTOM_FIELD_MAP[formKey];
+    if (!CRM_CUSTOM_KEY.test(crmKey)) continue;
+    const v = crmStr(b[formKey]);
+    if (v) out[crmKey] = v;
+  }
+  for (const key of CRM_TRACKING_KEYS) {
+    const v = crmStr(a[key]);
+    if (v) out[key] = v;            // utm_* + fbclid/gclid + landing_url
+  }
+  return out;
+}
+
+// Szerveroldali, az n8n-től független CRM-hívás. A hibája SOHA nem blokkolja a form választ.
+async function sendCrm(b, externalLeadId) {
+  if (!CRM_URL || !CRM_SECRET) return { ok: false, skipped: true };
+
+  const a = b.attribution || {};
+  const payload = {
+    client_external_id: 'training_hungary',
+    source: 'landing_form',
+    // Kampányszintű attribúció (az UTM-ek a contact.custom-ba is bekerülnek):
+    campaign: {
+      name: 'Weboldal űrlap',
+      utm_source: crmStr(a.utm_source),
+      utm_medium: crmStr(a.utm_medium),
+      utm_campaign: crmStr(a.utm_campaign),
+      utm_content: crmStr(a.utm_content),
+      utm_term: crmStr(a.utm_term)
+    },
+    contact: {
+      full_name: crmStr(b.nev),
+      email: crmStr(b.email),
+      phone: crmStr(b.telefon),
+      company_name: crmStr(b.ceg),
+      custom: buildCrmCustom(b, a)   // egyedi mezők + UTM + landing_url
+    },
+    external_lead_id: externalLeadId
+  };
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const r = await fetch(CRM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Webhook-Secret': CRM_SECRET },
+      body: JSON.stringify(payload), signal: ctrl.signal
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) console.error('[lead] CRM küldés sikertelen: HTTP ' + r.status);
+    return { ok: r.ok, status: r.status, body: j };
+  } catch (e) {
+    console.error('[lead] CRM küldés hiba:', String((e && e.message) || e));
+    return { ok: false, error: String((e && e.message) || e) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /* ---------- handler ---------- */
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
@@ -162,6 +249,11 @@ module.exports = async function handler(req, res) {
   // CAPI párhuzamosan; a hibája soha nem blokkolja a lead-rögzítést
   const capiPromise = sendCapi(body, meta).catch(e => ({ ok: false, error: String(e) }));
 
+  // Partner CRM párhuzamosan, az n8n-től FÜGGETLENÜL; a hibája soha nem blokkol.
+  // external_lead_id: stabil, submissionönként egyedi (idempotenciához) — a kliens event_id-jából.
+  const externalLeadId = body.event_id || crypto.randomUUID();
+  const crmPromise = sendCrm(body, externalLeadId).catch(e => ({ ok: false, error: String(e) }));
+
   // n8n továbbítás (ha be van állítva)
   if (N8N_URL) {
     try {
@@ -172,19 +264,19 @@ module.exports = async function handler(req, res) {
       const r = await fetch(N8N_URL, { method: 'POST', headers, body: JSON.stringify(fwd) });
       if (!r.ok) {
         const detail = await r.text().catch(() => '');
-        const capi = await capiPromise;
-        return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', status: r.status, detail: detail.slice(0, 300), capi });
+        const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
+        return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', status: r.status, detail: detail.slice(0, 300), capi, crm });
       }
     } catch (e) {
-      const capi = await capiPromise;
-      return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', detail: String((e && e.message) || e), capi });
+      const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
+      return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', detail: String((e && e.message) || e), capi, crm });
     }
-    const capi = await capiPromise;
-    return send(res, 200, { ok: true, capi });
+    const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
+    return send(res, 200, { ok: true, capi, crm });
   }
 
-  // Dev mód: nincs N8N_WEBHOOK_URL → csak logol (a CAPI ettől még fut, ha be van állítva)
-  const capi = await capiPromise;
+  // Dev mód: nincs N8N_WEBHOOK_URL → csak logol (a CAPI és a CRM ettől még fut, ha be van állítva)
+  const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
   console.log('[lead] devMode (nincs N8N_WEBHOOK_URL):', JSON.stringify({ nev: body.nev, email: body.email, partial: !!body.partial, szektor: body.szektor, terulet: body.terulet }));
-  return send(res, 200, { ok: true, devMode: true, capi });
+  return send(res, 200, { ok: true, devMode: true, capi, crm });
 };
