@@ -185,7 +185,7 @@ async function sendCrm(b, externalLeadId) {
 
   const a = b.attribution || {};
   const payload = {
-    client_external_id: 'training_hungary',
+    client_id: '4bba08c3-93ef-4636-9c3a-a2f7d23d1588',   // a célügyfél azonosítója (UUID)
     source: 'landing_form',
     // Kampányszintű attribúció (az UTM-ek a contact.custom-ba is bekerülnek):
     campaign: {

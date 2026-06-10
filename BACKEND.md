@@ -272,7 +272,7 @@ Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partne
 
 ```jsonc
 {
-  "client_external_id": "training_hungary",     // fix ügyfél-azonosító
+  "client_id": "4bba08c3-93ef-4636-9c3a-a2f7d23d1588",     // a célügyfél azonosítója (UUID)
   "source": "landing_form",
   "campaign": { "name": "Weboldal űrlap", "utm_source": "…", "utm_medium": "…",
                 "utm_campaign": "…", "utm_content": "…", "utm_term": "…" },
