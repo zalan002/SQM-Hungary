@@ -22,7 +22,8 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
    Vercel serverless függvény (api/lead.js, Node.js)
    ├─ validáció (név/email/telefon, teljesnél +cég/szerep/összeg)
    ├─ Meta Conversions API (CAPI) ──► graph.facebook.com/v21.0/<pixel>/events
-   └─ n8n webhook ──────────────────► CRM / automatizáció (traininghungary.app.n8n.cloud)
+   ├─ n8n webhook ──────────────────► automatizáció (traininghungary.app.n8n.cloud)
+   └─ Partner CRM webhook ──────────► CRM lead-rögzítés (független, best-effort)
 ```
 
 - **Frontend:** tisztán statikus HTML + inline `<script>` — nincs build lépés, nincs framework.
@@ -30,7 +31,9 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
   deployolja `/api/lead` útvonalra.
 - **Mérés kettős:** kliensoldali **Meta Pixel** és szerveroldali **Conversions API (CAPI)**,
   közös `event_id`-val deduplikálva.
-- **Lead-kézbesítés:** a szerver az n8n webhookra továbbít, az viszi a CRM-be / automatizációba.
+- **Lead-kézbesítés:** a szerver az n8n webhookra továbbít (automatizáció), **és emellett**
+  egy **független, best-effort** hívással a Partner CRM webhookjára is elküldi a leadet.
+  A két hívás nincs összevonva; a CRM hibája nem érinti az n8n flow-t és a form UX-ét.
 
 ---
 
@@ -40,7 +43,7 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
 |---|---|
 | `index.html` | Landing oldal — SITE_CONFIG, Pixel loader, attribúció, 6 lépéses form, teljes inline JS |
 | `koszonjuk-ajanlat/index.html` | Köszönő oldal — `CompleteRegistration` Pixel event, `?nev=` köszöntés |
-| `api/lead.js` | Serverless endpoint — validáció + CAPI + n8n továbbítás |
+| `api/lead.js` | Serverless endpoint — validáció + CAPI + n8n továbbítás + Partner CRM továbbítás |
 | `.env.example` | Környezeti változók sablonja (Vercel-be másolandó) |
 | `favicon.avif`, `logo.webp`, `partners/*` | Statikus assetek |
 | `MULTISTEP_FORM_SPEC.md` | (Elavult) korábbi React-változat specifikációja |
@@ -70,6 +73,8 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
 | `META_TEST_EVENT_CODE` | szerver | nem | Ha be van állítva, az események a Test Events fülre mennek. |
 | `N8N_WEBHOOK_URL` | szerver | igen (éles továbbításhoz) | n8n webhook URL. Ha üres → **dev mód** (csak konzolra logol). |
 | `N8N_WEBHOOK_SECRET` | szerver | nem | Ha van, `Authorization: Bearer <secret>` fejlécet küld az n8n felé. |
+| `CRM_WEBHOOK_URL` | szerver | igen (CRM továbbításhoz) | Partner CRM webhook URL. Ha üres → a CRM-hívás kimarad (nem hiba). |
+| `CRM_WEBHOOK_SECRET` | szerver | igen (CRM továbbításhoz) | `X-Webhook-Secret` fejléc; a CRM `WEBHOOK_SECRET`-jével azonos. Ha üres → a CRM-hívás kimarad. |
 
 **A Pixel ID a kliensbe is be van égetve** — lásd `window.SITE_CONFIG.META_PIXEL_ID`
 (`index.html` és `koszonjuk-ajanlat/index.html`). Jelenlegi érték: **`837800356068077`**.
@@ -191,12 +196,15 @@ A 6. lépés (`osszeg`) validálása után:
 3. Kiolvassa: IP (`x-forwarded-for` első értéke), `User-Agent`, `_fbp`/`_fbc` cookie-k.
 4. **CAPI eseményt indít párhuzamosan** (`sendCapiEvent`), 8 mp timeouttal; a CAPI hibája
    **soha nem blokkolja** a lead-rögzítést (catch-elve).
+4b. **Partner CRM hívást indít párhuzamosan** (`sendCrm`), az n8n-től **függetlenül**, 8 mp
+   timeouttal. A hibája/timeoutja **soha nem blokkol** (catch-elve), és az n8n flow-t nem érinti.
+   `external_lead_id` = a kliens `event_id`-ja (submissionönként egyedi → idempotencia).
 5. **n8n továbbítás:** ha `N8N_WEBHOOK_URL` be van állítva, ide POST-olja a teljes bodyt
    kiegészítve `client_ip`, `client_user_agent`, `fbp`, `fbc` mezőkkel. Ha van
-   `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel.
+   `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel. **(változatlan)**
    - n8n hálózati hiba → `502`; n8n nem-2xx → `502` (status + detail).
-6. Bevárja a CAPI promise-t, majd `200 { ok: true, capi }`.
-7. **Dev mód** (nincs `N8N_WEBHOOK_URL`): konzolra logol, `200 { ok: true, devMode: true, capi }`.
+6. Bevárja a CAPI és a CRM promise-t, majd `200 { ok: true, capi, crm }`.
+7. **Dev mód** (nincs `N8N_WEBHOOK_URL`): konzolra logol, `200 { ok: true, devMode: true, capi, crm }`.
 
 ---
 
@@ -245,8 +253,48 @@ megy ki → a Meta összepárosítja, nem duplázza.
 ## 9. n8n továbbítás
 
 A szerver a teljes lead-payloadot (a kliens body + szerveroldali `client_ip`, `client_user_agent`,
-`fbp`, `fbc`) JSON-ként POST-olja az `N8N_WEBHOOK_URL`-re. Innen az n8n flow viszi a CRM-be /
-automatizációba (e-mail, értesítés stb.). A CAPI-tól független: a CAPI akkor is fut, ha nincs n8n.
+`fbp`, `fbc`) JSON-ként POST-olja az `N8N_WEBHOOK_URL`-re. Innen az n8n flow viszi tovább
+(automatizáció, e-mail, értesítés stb.). A CAPI-tól független: a CAPI akkor is fut, ha nincs n8n.
+
+> **Megjegyzés:** ez a hívás **változatlan**. A Partner CRM-be külön, független hívás megy
+> (lásd 9/A), az n8n payloadot/headert/flow-t **nem** érinti.
+
+### 9/A. Partner CRM továbbítás (`sendCrm`) — független az n8n-től
+
+Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partner CRM-nek:
+
+- **Végpont:** `POST $CRM_WEBHOOK_URL`, fejléc: `X-Webhook-Secret: $CRM_WEBHOOK_SECRET`.
+- **Best-effort:** 8 mp timeout, try/catch — a hibája/timeoutja **soha** nem töri meg a form
+  választ, és **nem** befolyásolja az n8n hívást (a két hívás nincs összevonva).
+- **Csak szerveroldal:** a titok env-ből jön, kliensre nem szivárog (`X-Webhook-Secret`).
+
+**Payload (a CRM-szerződés szerint):**
+
+```jsonc
+{
+  "client_external_id": "training_hungary",     // fix ügyfél-azonosító
+  "source": "landing_form",
+  "campaign": { "name": "Weboldal űrlap", "utm_source": "…", "utm_medium": "…",
+                "utm_campaign": "…", "utm_content": "…", "utm_term": "…" },
+  "contact": {
+    "full_name": "<nev>", "email": "<email>", "phone": "<telefon>", "company_name": "<ceg>",
+    "custom": {                       // kulcsok: ^[a-z0-9_]{1,40}$ (ékezet nélküli snake_case)
+      "szektor": "<szektor>", "terulet": "<terulet>",
+      "utm_source": "…", "utm_medium": "…", "utm_campaign": "…", "utm_content": "…", "utm_term": "…",
+      "fbclid": "…", "gclid": "…", "landing_url": "<teljes belépő URL>"
+    }
+  },
+  "external_lead_id": "<event_id>"              // submissionönként egyedi → idempotencia
+}
+```
+
+- **Custom mező-map:** `szektor → szektor`, `terulet → terulet` (form-mező → CRM custom kulcs).
+  Új egyedi mezőt a `CRM_CUSTOM_FIELD_MAP`-ben kell felvenni (ékezet nélküli snake_case kulccsal).
+- **Forrás-attribúció:** az UTM-ek **a `campaign` blokkba ÉS** a `contact.custom`-ba is bekerülnek;
+  a teljes belépő URL `contact.custom.landing_url`-ben (a kliens `attribution`-jából). Ezek a CRM-ben
+  „tracking" mezők → csak operátor/admin látja.
+- **Üres értékű** custom mező **kimarad** (a `campaign` blokkban szerepelhet üresen).
+- A CRM az **e-mail alapján dedupál**; a custom kulcsokból automatikusan létrehozza a mezőket.
 
 ---
 
