@@ -16,8 +16,8 @@ Add hozzá az alábbiakat. Állítsd be mindhárom környezetre, ahol szüksége
 | `META_PIXEL_ID` | a CAPI-hoz **igen** | A Meta Pixel azonosítója (számsor) | Meta Events Manager → Adatforrások → a Pixel | Production (+ Preview) |
 | `META_CAPI_ACCESS_TOKEN` | a CAPI-hoz **igen** | Hosszú élettartamú CAPI token | Events Manager → a Pixel → Settings → **Conversions API → Generate access token** | Production (+ Preview) |
 | `META_TEST_EVENT_CODE` | nem | Tesztesemény-kód (pl. `TEST12345`) | Events Manager → **Test events** fül | csak Preview/Development teszthez |
-| `N8N_WEBHOOK_URL` | az éles lead-továbbításhoz **igen** | Az n8n webhook **Production** URL-je | n8n → a Webhook node → Production URL | Production |
-| `N8N_WEBHOOK_URL` (teszt) | — | Az n8n **Test** webhook URL-je | n8n → Webhook node → Test URL | Preview/Development |
+| `N8N_WEBHOOK_URL_GLOBAL` | az éles lead-továbbításhoz **igen** | Az n8n webhook **Production** URL-je | n8n → a Webhook node → Production URL | Production |
+| `N8N_WEBHOOK_URL_GLOBAL` (teszt) | — | Az n8n **Test** webhook URL-je | n8n → Webhook node → Test URL | Preview/Development |
 | `N8N_WEBHOOK_SECRET` | nem | Tetszőleges titok; `Authorization: Bearer <secret>` fejlécként megy az n8n felé | te választod (és az n8n-ben ellenőrzöd) | Production (+ Preview) |
 | `CRM_WEBHOOK_URL` | a CRM-továbbításhoz **igen** | A Partner CRM webhook URL-je (pl. `https://crm-nine-flame.vercel.app/api/webhooks/leads`) | a CRM-től | Production (+ Preview) |
 | `CRM_WEBHOOK_SECRET` | a CRM-továbbításhoz **igen** | `X-Webhook-Secret` fejléc értéke; **ugyanaz**, mint a CRM `WEBHOOK_SECRET`-je | a CRM-től | Production (+ Preview) |
@@ -26,7 +26,7 @@ Add hozzá az alábbiakat. Állítsd be mindhárom környezetre, ahol szüksége
 > **Viselkedés env nélkül:**
 > - Ha nincs `META_PIXEL_ID` **vagy** `META_CAPI_ACCESS_TOKEN` → a CAPI **kihagyásra kerül**
 >   (nem hiba), a lead a többi úton megy tovább.
-> - Ha nincs `N8N_WEBHOOK_URL` → **DEV mód**: a szerver csak logol, nem továbbít (a forma
+> - Ha nincs `N8N_WEBHOOK_URL_GLOBAL` → **DEV mód**: a szerver csak logol, nem továbbít (a forma
 >   ettől még sikeresen lefut és átirányít a köszönőoldalra). Így már a webhook beállítása
 >   előtt is tesztelhető a folyamat.
 > - Ha nincs `CRM_WEBHOOK_URL` **vagy** `CRM_WEBHOOK_SECRET` → a CRM-hívás **kimarad**
@@ -76,7 +76,7 @@ legyen ugyanaz**.
 1. [ ] Meta Pixel ID beírva `design/index.html` és `design/koszonjuk-ajanlat/index.html`
    `SITE_CONFIG`-jába.
 2. [ ] `META_PIXEL_ID` + `META_CAPI_ACCESS_TOKEN` beállítva a Vercelen (Production).
-3. [ ] n8n flow kész, `N8N_WEBHOOK_URL` beállítva (Production = production URL, Preview = test URL).
+3. [ ] n8n flow kész, `N8N_WEBHOOK_URL_GLOBAL` beállítva (Production = production URL, Preview = test URL).
 4. [ ] (Opcionális) `N8N_WEBHOOK_SECRET`, `ALLOWED_ORIGINS`, `META_TEST_EVENT_CODE`.
 4b. [ ] Partner CRM: `CRM_WEBHOOK_URL` + `CRM_WEBHOOK_SECRET` beállítva (a CRM `WEBHOOK_SECRET`-jével azonos).
 5. [ ] **Redeploy**.
