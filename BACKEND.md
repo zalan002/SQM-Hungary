@@ -77,7 +77,7 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
 | `CRM_WEBHOOK_SECRET` | szerver | igen (CRM továbbításhoz) | `X-Webhook-Secret` fejléc; a CRM `WEBHOOK_SECRET`-jével azonos. Ha üres → a CRM-hívás kimarad. |
 
 **A Pixel ID a kliensbe is be van égetve** — lásd `window.SITE_CONFIG.META_PIXEL_ID`
-(`index.html` és `koszonjuk-ajanlat/index.html`). Jelenlegi érték: **`837800356068077`**.
+(`index.html` és `koszonjuk-ajanlat/index.html`). Jelenlegi érték: **`4713852072218611`**.
 
 **n8n URL-ek (a `.env.example` szerint):**
 - Production: `https://traininghungary.app.n8n.cloud/webhook/36b9ab26-8552-40c3-8fdc-2f3cfc10045c`
@@ -91,7 +91,7 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
 
 ```js
 window.SITE_CONFIG = {
-  META_PIXEL_ID: '837800356068077',
+  META_PIXEL_ID: '4713852072218611',
   API_LEAD_PATH: '/api/lead',
   THANK_YOU_PATH: '/koszonjuk-ajanlat',
   LEAD_SOURCE: 'leadgen-fb-b2b-landing',

@@ -5,14 +5,16 @@
    több lépéses form, telefon utáni részleges mentés, köszönőoldal ?nev=.
    ------------------------------------------------------------
    FONTOS: a META_PIXEL_ID és az /api/lead serverless függvény élesítése
-   külön (backend) fázis. DEMO_MODE=true esetén az űrlap backend nélkül is
-   végigvihető (előnézethez); élesben állítsd false-ra.
+   külön (backend) fázis. DEMO_MODE=true esetén az űrlap UX-e szimulált (nem
+   függ a backend válaszától), de a leadet fire-and-forget elküldi a backendnek
+   is → az n8n (és ha be van állítva, a CRM/CAPI) így a dev/előnézet módban is
+   megkapja. Élesben állítsd false-ra (szinkron küldés + valódi hibakezelés).
    ============================================================ */
 (function () {
   "use strict";
 
   window.SITE_CONFIG = window.SITE_CONFIG || {
-    META_PIXEL_ID: "",                 // <- éles Pixel ID ide (vagy hagyd üresen teszthez)
+    META_PIXEL_ID: "4713852072218611", // <- éles Pixel ID (a HTML SITE_CONFIG felülírhatja)
     API_LEAD_PATH: "/api/lead",
     THANK_YOU_PATH: "/koszonjuk-ajanlat",
     LEAD_SOURCE: "leadgen-fb-ipari-padlo",
@@ -235,7 +237,17 @@
       elErr.textContent = msg || "Hiba történt a küldés során. Kérjük, próbálja újra, vagy hívjon minket: 06 20 208 8779.";
     }
 
-    if (CFG.DEMO_MODE) { setTimeout(onSuccess, 350); return; } // backend nélküli előnézet
+    if (CFG.DEMO_MODE) {
+      // Dev/előnézet: a UX szimulált (nem függ a backend válaszától), de a leadet
+      // fire-and-forget elküldjük a backendnek is → az n8n (N8N_WEBHOOK_URL), és ha be van
+      // állítva, a CRM/CAPI is megkapja. keepalive: az átirányítás után is befejeződik.
+      try {
+        fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(body), keepalive:true }).catch(function(){});
+      } catch (e) {}
+      setTimeout(onSuccess, 350);
+      return;
+    }
 
     fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { return { ok:r.ok, j:j }; }); })
