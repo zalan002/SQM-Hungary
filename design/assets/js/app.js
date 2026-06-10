@@ -12,7 +12,7 @@
   "use strict";
 
   window.SITE_CONFIG = window.SITE_CONFIG || {
-    META_PIXEL_ID: "",                 // <- éles Pixel ID ide (vagy hagyd üresen teszthez)
+    META_PIXEL_ID: "4713852072218611", // <- éles Pixel ID (a HTML SITE_CONFIG felülírhatja)
     API_LEAD_PATH: "/api/lead",
     THANK_YOU_PATH: "/koszonjuk-ajanlat",
     LEAD_SOURCE: "leadgen-fb-ipari-padlo",
