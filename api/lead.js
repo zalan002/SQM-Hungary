@@ -181,6 +181,7 @@ function buildCrmCustom(b, a) {
 
 // Szerveroldali, az n8n-től független CRM-hívás. A hibája SOHA nem blokkolja a form választ.
 async function sendCrm(b) {
+  if (b.partial === true) return { ok: false, skipped: 'partial' };  // részkitöltést egyelőre nem küldünk a CRM-nek
   if (!CRM_URL || !CRM_SECRET) return { ok: false, skipped: true };
 
   const a = b.attribution || {};
@@ -250,6 +251,7 @@ module.exports = async function handler(req, res) {
 
   // Partner CRM párhuzamosan, az n8n-től FÜGGETLENÜL; a hibája soha nem blokkol.
   // Az azonosítás a client_id alapján történik; external_lead_id-t nem küldünk.
+  // A részkitöltéseket (partial: true) egyelőre NEM küldjük a CRM-nek (az n8n-nek igen).
   const crmPromise = sendCrm(body).catch(e => ({ ok: false, error: String(e) }));
 
   // n8n továbbítás (ha be van állítva)
