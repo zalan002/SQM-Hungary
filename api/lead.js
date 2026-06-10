@@ -13,7 +13,7 @@ const crypto = require('node:crypto');
 const PIXEL_ID   = process.env.META_PIXEL_ID || process.env.NEXT_PUBLIC_META_PIXEL_ID || '';
 const CAPI_TOKEN = process.env.META_CAPI_ACCESS_TOKEN || '';
 const TEST_CODE  = process.env.META_TEST_EVENT_CODE || '';
-const N8N_URL    = process.env.N8N_WEBHOOK_URL_GLOBAL || '';
+const N8N_URL    = process.env.N8N_WEBHOOK_URL || '';
 const N8N_SECRET = process.env.N8N_WEBHOOK_SECRET || '';
 const CRM_URL    = process.env.CRM_WEBHOOK_URL || '';
 const CRM_SECRET = process.env.CRM_WEBHOOK_SECRET || '';
@@ -275,8 +275,8 @@ module.exports = async function handler(req, res) {
     return send(res, 200, { ok: true, capi, crm });
   }
 
-  // Dev mód: nincs N8N_WEBHOOK_URL_GLOBAL → csak logol (a CAPI és a CRM ettől még fut, ha be van állítva)
+  // Dev mód: nincs N8N_WEBHOOK_URL → csak logol (a CAPI és a CRM ettől még fut, ha be van állítva)
   const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
-  console.log('[lead] devMode (nincs N8N_WEBHOOK_URL_GLOBAL):', JSON.stringify({ nev: body.nev, email: body.email, partial: !!body.partial, szektor: body.szektor, terulet: body.terulet }));
+  console.log('[lead] devMode (nincs N8N_WEBHOOK_URL):', JSON.stringify({ nev: body.nev, email: body.email, partial: !!body.partial, szektor: body.szektor, terulet: body.terulet }));
   return send(res, 200, { ok: true, devMode: true, capi, crm });
 };

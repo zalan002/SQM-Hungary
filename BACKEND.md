@@ -71,7 +71,7 @@ layout) szándékosan csak ott említi, ahol a mérés szempontjából lényeges
 | `NEXT_PUBLIC_META_PIXEL_ID` (vagy `META_PIXEL_ID`) | szerver | igen (CAPI-hoz) | Meta Pixel ID. A szerver bármelyiket olvassa. |
 | `META_CAPI_ACCESS_TOKEN` | szerver | igen (CAPI-hoz) | Hosszú élettartamú CAPI access token (Events Manager → Settings). |
 | `META_TEST_EVENT_CODE` | szerver | nem | Ha be van állítva, az események a Test Events fülre mennek. |
-| `N8N_WEBHOOK_URL_GLOBAL` | szerver | igen (éles továbbításhoz) | n8n webhook URL. Ha üres → **dev mód** (csak konzolra logol). |
+| `N8N_WEBHOOK_URL` | szerver | igen (éles továbbításhoz) | n8n webhook URL. Ha üres → **dev mód** (csak konzolra logol). |
 | `N8N_WEBHOOK_SECRET` | szerver | nem | Ha van, `Authorization: Bearer <secret>` fejlécet küld az n8n felé. |
 | `CRM_WEBHOOK_URL` | szerver | igen (CRM továbbításhoz) | Partner CRM webhook URL. Ha üres → a CRM-hívás kimarad (nem hiba). |
 | `CRM_WEBHOOK_SECRET` | szerver | igen (CRM továbbításhoz) | `X-Webhook-Secret` fejléc; a CRM `WEBHOOK_SECRET`-jével azonos. Ha üres → a CRM-hívás kimarad. |
@@ -199,12 +199,12 @@ A 6. lépés (`osszeg`) validálása után:
 4b. **Partner CRM hívást indít párhuzamosan** (`sendCrm`), az n8n-től **függetlenül**, 8 mp
    timeouttal. A hibája/timeoutja **soha nem blokkol** (catch-elve), és az n8n flow-t nem érinti.
    `external_lead_id` = a kliens `event_id`-ja (submissionönként egyedi → idempotencia).
-5. **n8n továbbítás:** ha `N8N_WEBHOOK_URL_GLOBAL` be van állítva, ide POST-olja a teljes bodyt
+5. **n8n továbbítás:** ha `N8N_WEBHOOK_URL` be van állítva, ide POST-olja a teljes bodyt
    kiegészítve `client_ip`, `client_user_agent`, `fbp`, `fbc` mezőkkel. Ha van
    `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel. **(változatlan)**
    - n8n hálózati hiba → `502`; n8n nem-2xx → `502` (status + detail).
 6. Bevárja a CAPI és a CRM promise-t, majd `200 { ok: true, capi, crm }`.
-7. **Dev mód** (nincs `N8N_WEBHOOK_URL_GLOBAL`): konzolra logol, `200 { ok: true, devMode: true, capi, crm }`.
+7. **Dev mód** (nincs `N8N_WEBHOOK_URL`): konzolra logol, `200 { ok: true, devMode: true, capi, crm }`.
 
 ---
 
@@ -253,7 +253,7 @@ megy ki → a Meta összepárosítja, nem duplázza.
 ## 9. n8n továbbítás
 
 A szerver a teljes lead-payloadot (a kliens body + szerveroldali `client_ip`, `client_user_agent`,
-`fbp`, `fbc`) JSON-ként POST-olja az `N8N_WEBHOOK_URL_GLOBAL`-re. Innen az n8n flow viszi tovább
+`fbp`, `fbc`) JSON-ként POST-olja az `N8N_WEBHOOK_URL`-re. Innen az n8n flow viszi tovább
 (automatizáció, e-mail, értesítés stb.). A CAPI-tól független: a CAPI akkor is fut, ha nincs n8n.
 
 > **Megjegyzés:** ez a hívás **változatlan**. A Partner CRM-be külön, független hívás megy
@@ -330,7 +330,7 @@ Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partne
 2. **`SITE_CONFIG`** beállítása: új `META_PIXEL_ID`, `LEAD_SOURCE`(_PARTIAL), `PIXEL_CONTENT_*`.
 3. **Serverless függvény** `api/lead.js` (változatlan logika): validáció + CAPI + n8n.
 4. **Env változók** Vercelben: `META_CAPI_ACCESS_TOKEN`, (`NEXT_PUBLIC_)META_PIXEL_ID`,
-   `N8N_WEBHOOK_URL_GLOBAL`, opcionálisan `N8N_WEBHOOK_SECRET`, `META_TEST_EVENT_CODE`.
+   `N8N_WEBHOOK_URL`, opcionálisan `N8N_WEBHOOK_SECRET`, `META_TEST_EVENT_CODE`.
 5. **n8n flow** a webhookkal (CRM cél).
 6. **Lépésszövegek/opciók** (`steps`, `ROLE_OPTIONS`, `AMOUNT_OPTIONS`) brand szerint.
 7. A **mérési logika változatlan** maradjon: telefon utáni partial, közös `event_id` Pixel+CAPI,
