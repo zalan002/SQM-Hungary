@@ -107,7 +107,7 @@ A `/api/lead` az n8n **mellett** egy külön HTTP-kérést is küld a `CRM_WEBHO
 
 ```jsonc
 {
-  "client_external_id": "training_hungary",   // fix: a Training Hungary Kft. ügyfél
+  "client_id": "4bba08c3-93ef-4636-9c3a-a2f7d23d1588",   // a célügyfél azonosítója (UUID)
   "source": "landing_form",
   "campaign": { "name": "Weboldal űrlap", "utm_source": "...", "utm_medium": "...",
                 "utm_campaign": "...", "utm_content": "...", "utm_term": "..." },
@@ -138,7 +138,7 @@ A `/api/lead` az n8n **mellett** egy külön HTTP-kérést is küld a `CRM_WEBHO
 curl -i -X POST "$CRM_WEBHOOK_URL" \
   -H 'Content-Type: application/json' \
   -H "X-Webhook-Secret: $CRM_WEBHOOK_SECRET" \
-  -d '{"client_external_id":"training_hungary","source":"landing_form",
+  -d '{"client_id":"4bba08c3-93ef-4636-9c3a-a2f7d23d1588","source":"landing_form",
        "campaign":{"name":"Weboldal űrlap teszt","utm_campaign":"tavaszi_2026"},
        "contact":{"full_name":"Teszt Anna","email":"teszt.anna@example.com","phone":"+36301112233",
          "custom":{"szektor":"Élelmiszeripar","utm_campaign":"tavaszi_2026"}},
