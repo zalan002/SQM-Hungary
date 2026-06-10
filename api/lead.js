@@ -180,7 +180,7 @@ function buildCrmCustom(b, a) {
 }
 
 // Szerveroldali, az n8n-től független CRM-hívás. A hibája SOHA nem blokkolja a form választ.
-async function sendCrm(b, externalLeadId) {
+async function sendCrm(b) {
   if (!CRM_URL || !CRM_SECRET) return { ok: false, skipped: true };
 
   const a = b.attribution || {};
@@ -202,8 +202,7 @@ async function sendCrm(b, externalLeadId) {
       phone: crmStr(b.telefon),
       company_name: crmStr(b.ceg),
       custom: buildCrmCustom(b, a)   // egyedi mezők + UTM + landing_url
-    },
-    external_lead_id: externalLeadId
+    }
   };
 
   const ctrl = new AbortController();
@@ -250,9 +249,8 @@ module.exports = async function handler(req, res) {
   const capiPromise = sendCapi(body, meta).catch(e => ({ ok: false, error: String(e) }));
 
   // Partner CRM párhuzamosan, az n8n-től FÜGGETLENÜL; a hibája soha nem blokkol.
-  // external_lead_id: stabil, submissionönként egyedi (idempotenciához) — a kliens event_id-jából.
-  const externalLeadId = body.event_id || crypto.randomUUID();
-  const crmPromise = sendCrm(body, externalLeadId).catch(e => ({ ok: false, error: String(e) }));
+  // Az azonosítás a client_id alapján történik; external_lead_id-t nem küldünk.
+  const crmPromise = sendCrm(body).catch(e => ({ ok: false, error: String(e) }));
 
   // n8n továbbítás (ha be van állítva)
   if (N8N_URL) {

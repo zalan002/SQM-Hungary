@@ -198,7 +198,7 @@ A 6. lépés (`osszeg`) validálása után:
    **soha nem blokkolja** a lead-rögzítést (catch-elve).
 4b. **Partner CRM hívást indít párhuzamosan** (`sendCrm`), az n8n-től **függetlenül**, 8 mp
    timeouttal. A hibája/timeoutja **soha nem blokkol** (catch-elve), és az n8n flow-t nem érinti.
-   `external_lead_id` = a kliens `event_id`-ja (submissionönként egyedi → idempotencia).
+   Az azonosítás a `client_id` (és a `contact.email` dedup) alapján történik; `external_lead_id`-t nem küldünk.
 5. **n8n továbbítás:** ha `N8N_WEBHOOK_URL` be van állítva, ide POST-olja a teljes bodyt
    kiegészítve `client_ip`, `client_user_agent`, `fbp`, `fbc` mezőkkel. Ha van
    `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel. **(változatlan)**
@@ -283,10 +283,10 @@ Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partne
       "utm_source": "…", "utm_medium": "…", "utm_campaign": "…", "utm_content": "…", "utm_term": "…",
       "fbclid": "…", "gclid": "…", "landing_url": "<teljes belépő URL>"
     }
-  },
-  "external_lead_id": "<event_id>"              // submissionönként egyedi → idempotencia
+  }
 }
 ```
+> Az azonosítás a `client_id` (és a `contact.email` dedup) alapján történik; `external_lead_id`-t nem küldünk.
 
 - **Custom mező-map:** `szektor → szektor`, `terulet → terulet` (form-mező → CRM custom kulcs).
   Új egyedi mezőt a `CRM_CUSTOM_FIELD_MAP`-ben kell felvenni (ékezet nélküli snake_case kulccsal).

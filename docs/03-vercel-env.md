@@ -121,10 +121,10 @@ A `/api/lead` az n8n **mellett** egy külön HTTP-kérést is küld a `CRM_WEBHO
       "fbclid": "...", "gclid": "...",
       "landing_url": "<a teljes belépő URL>"
     }
-  },
-  "external_lead_id": "<event_id>"   // submissionönként egyedi → idempotencia
+  }
 }
 ```
+> Az azonosítás a `client_id` (és a `contact.email` dedup) alapján történik; `external_lead_id`-t nem küldünk.
 
 - **Üres értékű** custom mező **kimarad** (csak a `campaign` blokkban szerepelhet üresen).
 - Az **UTM-ek, `fbclid`/`gclid` és `landing_url`** a CRM-ben „tracking" mezők → **csak
@@ -141,7 +141,6 @@ curl -i -X POST "$CRM_WEBHOOK_URL" \
   -d '{"client_id":"4bba08c3-93ef-4636-9c3a-a2f7d23d1588","source":"landing_form",
        "campaign":{"name":"Weboldal űrlap teszt","utm_campaign":"tavaszi_2026"},
        "contact":{"full_name":"Teszt Anna","email":"teszt.anna@example.com","phone":"+36301112233",
-         "custom":{"szektor":"Élelmiszeripar","utm_campaign":"tavaszi_2026"}},
-       "external_lead_id":"form-test-0001"}'
+         "custom":{"szektor":"Élelmiszeripar","utm_campaign":"tavaszi_2026"}}}'
 # Elvárt: 201 + { "contact_id": "...", "deal_id": "...", "created_contact": true }
 ```
