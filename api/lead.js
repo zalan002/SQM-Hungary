@@ -2,10 +2,11 @@
 
 /**
  * SQM Hungary — lead endpoint (Vercel serverless, Node 18+ runtime)
- * A BACKEND.md pipeline szerint: validáció → Meta Conversions API (CAPI) → n8n továbbítás.
+ * Folyamat: validáció → n8n továbbítás → (CSAK sikeres kézbesítés után) Meta Conversions API (CAPI).
  * Emellett egy FÜGGETLEN, best-effort hívás a Partner CRM felé (az n8n flow VÁLTOZATLAN).
  * Mezők (ipari padló lead-gen): nev, email, telefon, ceg, szektor, terulet.
  * A kliens Pixel `Lead` és a szerver CAPI `Lead` KÖZÖS event_id-val megy → dedup.
+ * Részkitöltés CAPI-event neve: `PartialContact` (NEM "Lead", hogy ne csússzon Lead-szűrőkbe).
  */
 
 const crypto = require('node:crypto');
@@ -116,7 +117,7 @@ async function sendCapi(b, meta) {
   });
 
   const payload = { data: [{
-    event_name: isPartial ? 'LeadPartial' : 'Lead',
+    event_name: isPartial ? 'PartialContact' : 'Lead',
     event_time: Math.floor(Date.now() / 1000),
     event_id: b.event_id,
     event_source_url: b.event_source_url,
@@ -246,13 +247,15 @@ module.exports = async function handler(req, res) {
   const ua = req.headers['user-agent'] || '';
   const meta = { ip, ua, fbp: getCookie(req, '_fbp'), fbc: getCookie(req, '_fbc') };
 
-  // CAPI párhuzamosan; a hibája soha nem blokkolja a lead-rögzítést
-  const capiPromise = sendCapi(body, meta).catch(e => ({ ok: false, error: String(e) }));
-
   // Partner CRM párhuzamosan, az n8n-től FÜGGETLENÜL; a hibája soha nem blokkol.
   // Az azonosítás a client_id alapján történik; external_lead_id-t nem küldünk.
   // A részkitöltéseket (partial: true) egyelőre NEM küldjük a CRM-nek (az n8n-nek igen).
   const crmPromise = sendCrm(body).catch(e => ({ ok: false, error: String(e) }));
+
+  // FONTOS: a CAPI eseményt CSAK akkor küldjük, ha a lead ténylegesen kézbesítve lett
+  // (n8n 2xx, vagy dev mód). Így a Meta nem számol be olyan konverziót, ami nálunk NEM
+  // érkezett be → nincs túlmérés a sikertelen/timeoutos n8n-hívások miatt.
+  const fireCapi = () => sendCapi(body, meta).catch(e => ({ ok: false, error: String(e) }));
 
   // n8n továbbítás (ha be van állítva)
   if (N8N_URL) {
@@ -264,19 +267,22 @@ module.exports = async function handler(req, res) {
       const r = await fetch(N8N_URL, { method: 'POST', headers, body: JSON.stringify(fwd) });
       if (!r.ok) {
         const detail = await r.text().catch(() => '');
-        const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
-        return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', status: r.status, detail: detail.slice(0, 300), capi, crm });
+        const crm = await crmPromise;
+        // A lead NEM érkezett be → nem küldünk CAPI-t (a Meta ne számolja konverziónak).
+        return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', status: r.status, detail: detail.slice(0, 300), capi: { ok: false, skipped: 'n8n-failed' }, crm });
       }
     } catch (e) {
-      const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
-      return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', detail: String((e && e.message) || e), capi, crm });
+      const crm = await crmPromise;
+      // A lead NEM érkezett be → nem küldünk CAPI-t (a Meta ne számolja konverziónak).
+      return send(res, 502, { error: 'Nem sikerült rögzíteni a leadet, kérjük próbálja újra.', detail: String((e && e.message) || e), capi: { ok: false, skipped: 'n8n-error' }, crm });
     }
-    const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
+    // n8n sikeres kézbesítés → MOST küldjük ki a CAPI eseményt.
+    const [capi, crm] = await Promise.all([fireCapi(), crmPromise]);
     return send(res, 200, { ok: true, capi, crm });
   }
 
-  // Dev mód: nincs N8N_WEBHOOK_URL → csak logol (a CAPI és a CRM ettől még fut, ha be van állítva)
-  const [capi, crm] = await Promise.all([capiPromise, crmPromise]);
+  // Dev mód: nincs N8N_WEBHOOK_URL → a lead "kézbesítettnek" számít (csak logol). A CAPI itt is fut.
+  const [capi, crm] = await Promise.all([fireCapi(), crmPromise]);
   console.log('[lead] devMode (nincs N8N_WEBHOOK_URL):', JSON.stringify({ nev: body.nev, email: body.email, partial: !!body.partial, szektor: body.szektor, terulet: body.terulet }));
   return send(res, 200, { ok: true, devMode: true, capi, crm });
 };

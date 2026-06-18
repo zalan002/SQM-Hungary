@@ -89,8 +89,9 @@ köszönőoldalra).
 
 A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
 
-- **`api/lead.js`** (Vercel serverless) — validáció → Meta Conversions API (`Lead` / telefon
-  után `LeadPartial`) → n8n lead-továbbítás. Kliens Pixel + szerver CAPI **közös `event_id`** → dedup.
+- **`api/lead.js`** (Vercel serverless) — validáció → n8n lead-továbbítás → **(csak sikeres
+  kézbesítés után)** Meta Conversions API (`Lead` / telefon után `PartialContact`). Kliens Pixel +
+  szerver CAPI **közös `event_id`** → dedup. n8n-hiba (502) esetén **nem megy ki CAPI** (nincs túlmérés).
 - **`DEMO_MODE = false`** a `design/index.html`-ben (az űrlap valódi `/api/lead` hívást küld).
 - **Honeypot** anti-spam mező a formban.
 - **Env változók + élesítési checklist:** [`docs/03-vercel-env.md`](docs/03-vercel-env.md),

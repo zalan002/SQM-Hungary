@@ -102,8 +102,16 @@
     if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");
     fbq("init",CFG.META_PIXEL_ID); fbq("track","PageView");
-    var id; try{id=crypto.randomUUID();}catch(e){id="evt_"+Date.now();}
-    fbq("track","CompleteRegistration",{content_name:CFG.PIXEL_CONTENT_NAME,content_category:CFG.PIXEL_CONTENT_CATEGORY},{eventID:id});
+    /* CompleteRegistration CSAK valódi beküldés után (a landing ?cr= egyedi id-t ad át),
+       és frissítésre/visszalépésre NEM ismétlődik (sessionStorage jelöli, mi sült már el).
+       A ?cr= értéket eventID-ként használjuk → ha mégis újra elsülne, a Meta deduplikálja. */
+    try {
+      var crId = new URL(location.href).searchParams.get("cr");
+      if (crId && sessionStorage.getItem("cr_fired") !== crId) {
+        fbq("track","CompleteRegistration",{content_name:CFG.PIXEL_CONTENT_NAME,content_category:CFG.PIXEL_CONTENT_CATEGORY},{eventID:crId});
+        sessionStorage.setItem("cr_fired", crId);
+      }
+    } catch(e) {}
   }
   /* Személyre szóló köszöntés a ?nev= paraméterből (XSS-escape) */
   try{
