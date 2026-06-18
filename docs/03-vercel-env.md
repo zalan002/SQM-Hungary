@@ -61,10 +61,11 @@ legyen ugyanaz**.
 
 - `design/index.html` → `SITE_CONFIG.DEMO_MODE = false` (már beállítva): az űrlap valódi
   `POST /api/lead` hívást küld a DEMO-szimuláció helyett.
-- `api/lead.js` (új): validáció → Meta CAPI (`Lead` / telefon után `LeadPartial`) → n8n
-  továbbítás **+** Partner CRM-továbbítás (független, best-effort). A kliens Pixel `Lead` és a
-  szerver CAPI `Lead` **közös `event_id`**-val megy ki → a Meta dedup­likál. A CRM-hívás külön
-  HTTP-kérés a `CRM_WEBHOOK_URL`-re (`X-Webhook-Secret` fejléc), az n8n hívás **érintetlen**.
+- `api/lead.js` (új): validáció → n8n továbbítás → **(csak sikeres kézbesítés után)** Meta CAPI
+  (`Lead` / telefon után `PartialContact`) **+** Partner CRM-továbbítás (független, best-effort).
+  A kliens Pixel `Lead` és a szerver CAPI `Lead` **közös `event_id`**-val megy ki → a Meta dedup­likál.
+  Ha az n8n elbukik (502), **nem megy ki CAPI** → a Meta nem számol be nem érkezett leadet. A CRM-hívás
+  külön HTTP-kérés a `CRM_WEBHOOK_URL`-re (`X-Webhook-Secret` fejléc), az n8n hívás **érintetlen**.
 - `vercel.json`: a `/api/*` útvonal explicit átengedve (a statikus rewrite nem érinti).
 - **Honeypot anti-spam:** a formban rejtett `website` mező; ha kitöltött (bot), a szerver
   csendben `200`-at ad és **nem** továbbít.
@@ -81,8 +82,8 @@ legyen ugyanaz**.
 4b. [ ] Partner CRM: `CRM_WEBHOOK_URL` + `CRM_WEBHOOK_SECRET` beállítva (a CRM `WEBHOOK_SECRET`-jével azonos).
 5. [ ] **Redeploy**.
 6. [ ] Teszt: űrlap kitöltése → Events Manager **Test events**-ben látszik a `Lead`
-   (és telefon után `LeadPartial`); az n8n-be megérkezik a payload; átirányítás a
-   köszönőoldalra `?nev=`-vel.
+   (és telefon után `PartialContact`) — **csak sikeres n8n-kézbesítés után**; az n8n-be megérkezik
+   a payload; átirányítás a köszönőoldalra `?nev=…&cr=…`-vel (ott egyszer `CompleteRegistration`).
 7. [ ] `META_TEST_EVENT_CODE` eltávolítása élesbenhez (hogy ne a Test events-be menjen).
 
 ---

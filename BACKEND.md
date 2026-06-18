@@ -160,7 +160,7 @@ A radio-csoportok `<button role="radio">` elemek; kiválasztáskor `aria-checked
   lépésen vagyunk → `sendPartial()`**; majd `stepIndex++` vagy az utolsónál `submit()`.
 - **Egyetlen `<form novalidate>`** — `submit` esemény → `next()` (Enter is továbblép).
 
-### 6.3 Részleges mentés — `sendPartial()` (LeadPartial)
+### 6.3 Részleges mentés — `sendPartial()` (PartialContact)
 
 A **telefon lépés** sikeres validációja után, **egyszer** (`partialSent`):
 
@@ -194,31 +194,33 @@ A 6. lépés (`osszeg`) validálása után:
    - Ha `partial !== true`: `ceg` ≥ 2, `szerep` és `osszeg` kötelező.
    - Hiba → `422` magyar üzenettel.
 3. Kiolvassa: IP (`x-forwarded-for` első értéke), `User-Agent`, `_fbp`/`_fbc` cookie-k.
-4. **CAPI eseményt indít párhuzamosan** (`sendCapiEvent`), 8 mp timeouttal; a CAPI hibája
-   **soha nem blokkolja** a lead-rögzítést (catch-elve).
-4b. **Partner CRM hívást indít párhuzamosan** (`sendCrm`), az n8n-től **függetlenül**, 8 mp
+4. **Partner CRM hívást indít párhuzamosan** (`sendCrm`), az n8n-től **függetlenül**, 8 mp
    timeouttal. A hibája/timeoutja **soha nem blokkol** (catch-elve), és az n8n flow-t nem érinti.
    Az azonosítás a `client_id` (és a `contact.email` dedup) alapján történik; `external_lead_id`-t nem küldünk.
 5. **n8n továbbítás:** ha `N8N_WEBHOOK_URL` be van állítva, ide POST-olja a teljes bodyt
    kiegészítve `client_ip`, `client_user_agent`, `fbp`, `fbc` mezőkkel. Ha van
-   `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel. **(változatlan)**
-   - n8n hálózati hiba → `502`; n8n nem-2xx → `502` (status + detail).
-6. Bevárja a CAPI és a CRM promise-t, majd `200 { ok: true, capi, crm }`.
-7. **Dev mód** (nincs `N8N_WEBHOOK_URL`): konzolra logol, `200 { ok: true, devMode: true, capi, crm }`.
+   `N8N_WEBHOOK_SECRET`, `Authorization: Bearer` fejléccel.
+   - n8n hálózati hiba → `502`; n8n nem-2xx → `502` (status + detail). **Ilyenkor NEM megy ki CAPI esemény.**
+6. **CAPI esemény — CSAK sikeres n8n-kézbesítés után** (`sendCapi`), 8 mp timeouttal; a CAPI hibája
+   **soha nem blokkolja** a választ (catch-elve). Így a Meta **nem számol be olyan leadet, ami nem érkezett be**.
+7. Bevárja a CAPI és a CRM eredményt, majd `200 { ok: true, capi, crm }`.
+8. **Dev mód** (nincs `N8N_WEBHOOK_URL`): a lead kézbesítettnek számít, konzolra logol (a CAPI ettől még fut),
+   `200 { ok: true, devMode: true, capi, crm }`.
 
 ---
 
-## 8. Meta Conversions API (`sendCapiEvent`)
+## 8. Meta Conversions API (`sendCapi`)
 
 - **Endpoint:** `https://graph.facebook.com/v21.0/<pixelId>/events?access_token=<token>`.
 - Ha hiányzik a pixel ID vagy token → `{ ok:false, skipped:true }` (nem hiba).
-- **Event név:** `partial === true` → `LeadPartial`, egyébként `Lead`.
+- **Csak sikeres n8n-kézbesítés (vagy dev mód) után fut** — lásd 7. szakasz 6. lépés.
+- **Event név:** `partial === true` → `PartialContact`, egyébként `Lead`.
 
 **Payload:**
 ```json
 {
   "data": [{
-    "event_name": "Lead" | "LeadPartial",
+    "event_name": "Lead" | "PartialContact",
     "event_time": <unix sec>,
     "event_id": "<ugyanaz, mint a Pixel track-en>",
     "event_source_url": "<oldal URL>",
@@ -303,8 +305,11 @@ Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partne
 - `<meta name="robots" content="noindex, nofollow">`.
 - Saját `SITE_CONFIG` + Pixel loader (PageView).
 - `?nev=` query-ből XSS-escape-elt köszöntés.
-- Mount-kor egyszer: `fbq('track', 'CompleteRegistration', { content_name, content_category }, { eventID: <új UUID> })`
-  — **csak Pixel, nincs CAPI párja** (ezért külön, eldobható event_id).
+- **CompleteRegistration CSAK valódi beküldés után**: a landing a `?cr=<egyedi id>` paramétert adja át,
+  és a köszönő oldal csak akkor lő `fbq('track', 'CompleteRegistration', …, { eventID: <cr id> })`-t,
+  ha van `cr` és az még nem sült el (sessionStorage `cr_fired`). **Csak Pixel, nincs CAPI párja.**
+  Frissítésre/visszalépésre **nem ismétlődik**; közvetlen URL-megnyitásra (nincs `cr`) **nem sül el**.
+  A `cr` id-t eventID-ként használva a Meta deduplikál, ha mégis kétszer futna.
 
 ---
 
@@ -313,13 +318,13 @@ Az n8n hívás **mellett** a szerver egy külön HTTP-kérést is küld a Partne
 | Trigger | Pixel event | CAPI event | event_id |
 |---|---|---|---|
 | Bármely oldal betöltés | `PageView` | — | — |
-| Telefon lépés validálva | **nincs** (szándékosan) | `LeadPartial` | partial saját UUID |
-| Form sikeres beküldés | `Lead` | `Lead` | **közös** mount-kori `eventId` |
-| Köszönő oldal betöltés | `CompleteRegistration` | — | eldobható UUID |
+| Telefon lépés validálva | **nincs** (szándékosan) | `PartialContact` (csak n8n-siker után) | partial saját UUID |
+| Form sikeres beküldés | `Lead` | `Lead` (csak n8n-siker után) | **közös** mount-kori `eventId` |
+| Köszönő oldal (valódi beküldés után) | `CompleteRegistration` | — | landingről kapott `cr` id (sessionStorage anti-dupla) |
 
-> A `LeadPartial`-ra **szándékosan nincs kliens Pixel** — a Meta `Lead` optimalizálós szignálját
+> A `PartialContact`-ra **szándékosan nincs kliens Pixel** — a Meta `Lead` optimalizálós szignálját
 > tisztán tartja (csak teljes leadekre), a részleges kontakt szerveroldalon, retargeting/attribúció
-> céllal megy ki külön event_name-mel.
+> céllal megy ki **külön, nem-„Lead" event_name-mel** (így nem csúszik Lead-szűrőkbe/egyéni konverzióba).
 
 ---
 

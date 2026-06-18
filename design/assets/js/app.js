@@ -230,7 +230,13 @@
     function onSuccess() {
       firePixel("Lead", { content_name: CFG.PIXEL_CONTENT_NAME, content_category: CFG.PIXEL_CONTENT_CATEGORY }, eventId);
       var keresztnev = (state.nev || "").trim().split(/\s+/).pop() || "";
-      location.href = CFG.THANK_YOU_PATH + (keresztnev ? "?nev=" + encodeURIComponent(keresztnev) : "");
+      // Egyedi azonosító (cr) a köszönő-oldali CompleteRegistration-höz: így az csak VALÓDI
+      // beküldés után sül el, és frissítésre/visszalépésre nem ismétlődik (a köszönő oldal
+      // sessionStorage-ben jelöli, melyik cr sült már el; a cr eventID-ként is dedupál).
+      var qs = [];
+      if (keresztnev) qs.push("nev=" + encodeURIComponent(keresztnev));
+      qs.push("cr=" + encodeURIComponent(generateEventId()));
+      location.href = CFG.THANK_YOU_PATH + "?" + qs.join("&");
     }
     function onError(msg) {
       submitting = false; elNext.removeAttribute("disabled");

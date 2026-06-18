@@ -139,7 +139,7 @@ A design ezt az arculatot **követi** (a wireframe szándékosan arculat nélkü
 ## 7. Lead-form logika (backend-kompatibilis)
 
 A `BACKEND.md` mintát követjük: **több lépéses** űrlap, lépésenként egy fókuszált kérdés,
-a **telefon lépés** után **részleges mentés** (`LeadPartial`), a végén teljes `Lead` esemény,
+a **telefon lépés** után **részleges mentés** (`PartialContact`), a végén teljes `Lead` esemény,
 majd átirányítás a köszönőoldalra `?nev=<keresztnév>` paraméterrel. Pixel + CAPI **közös
 `event_id`-val** deduplikálva.
 
@@ -170,9 +170,9 @@ Gyártás / Elektronika (ESD) · Autóipar · Vegyipar · Egyéb ipari
 | Trigger | Pixel | CAPI | event_id |
 |---|---|---|---|
 | Oldalbetöltés (mindkét oldal) | `PageView` | — | — |
-| Telefon lépés validálva | — | `LeadPartial` | saját UUID |
-| Form sikeres beküldés | `Lead` | `Lead` | közös (mount-kori) |
-| Köszönőoldal betöltés | `CompleteRegistration` | — | eldobható UUID |
+| Telefon lépés validálva | — | `PartialContact` (csak n8n-siker után) | saját UUID |
+| Form sikeres beküldés | `Lead` | `Lead` (csak n8n-siker után) | közös (mount-kori) |
+| Köszönőoldal (valódi beküldés után) | `CompleteRegistration` | — | landingről kapott `cr` id (anti-dupla) |
 
 > A `api/lead.js` serverless függvény, az env-változók és az n8n-flow a `BACKEND.md` szerint
 > külön (backend) fázisban készül. Ez a deliverable a **wireframe + design (frontend)** réteget
