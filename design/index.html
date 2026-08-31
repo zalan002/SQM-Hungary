@@ -25,7 +25,11 @@
     LEAD_SOURCE_PARTIAL: "leadgen-fb-ipari-padlo-partial",
     PIXEL_CONTENT_NAME: "SQM Hungary ipari padló ajánlatkérés",
     PIXEL_CONTENT_CATEGORY: "facebook-b2b-leadgen-flooring",
-    DEMO_MODE: false                   /* élesítve: az űrlap a /api/lead végpontra küld */
+    /* A form HÁTTERE: a Partner CRM nyilvános űrlap-végpontja fogadja a beküldést.
+       Ha üresre állítod, az űrlap a korábbi módon, az /api/lead válaszára támaszkodik. */
+    CRM_FORM_URL: "https://partnercrm.leadgensolution.hu/api/public/forms/042b261af69d38431554fd2a534c0ea7",
+    CRM_FORM_KEY: "042b261af69d38431554fd2a534c0ea7",
+    DEMO_MODE: false                   /* élesítve: az űrlap a CRM-be és a /api/lead-re is küld */
   };
 </script>
 </head>
