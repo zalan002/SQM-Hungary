@@ -19,8 +19,6 @@ Add hozzá az alábbiakat. Állítsd be mindhárom környezetre, ahol szüksége
 | `N8N_WEBHOOK_URL` | az éles lead-továbbításhoz **igen** | Az n8n webhook **Production** URL-je | n8n → a Webhook node → Production URL | Production |
 | `N8N_WEBHOOK_URL` (teszt) | — | Az n8n **Test** webhook URL-je | n8n → Webhook node → Test URL | Preview/Development |
 | `N8N_WEBHOOK_SECRET` | nem | Tetszőleges titok; `Authorization: Bearer <secret>` fejlécként megy az n8n felé | te választod (és az n8n-ben ellenőrzöd) | Production (+ Preview) |
-| `CRM_WEBHOOK_URL` | a CRM-továbbításhoz **igen** | A Partner CRM webhook URL-je (pl. `https://crm-nine-flame.vercel.app/api/webhooks/leads`) | a CRM-től | Production (+ Preview) |
-| `CRM_WEBHOOK_SECRET` | a CRM-továbbításhoz **igen** | `X-Webhook-Secret` fejléc értéke; **ugyanaz**, mint a CRM `WEBHOOK_SECRET`-je | a CRM-től | Production (+ Preview) |
 | `ALLOWED_ORIGINS` | nem (ajánlott) | Engedélyezett originek vesszővel: `https://sqm-hungary.hu,https://www.sqm-hungary.hu` | a saját éles domain(ek) | Production |
 
 > **Viselkedés env nélkül:**
@@ -29,9 +27,9 @@ Add hozzá az alábbiakat. Állítsd be mindhárom környezetre, ahol szüksége
 > - Ha nincs `N8N_WEBHOOK_URL` → **DEV mód**: a szerver csak logol, nem továbbít (a forma
 >   ettől még sikeresen lefut és átirányít a köszönőoldalra). Így már a webhook beállítása
 >   előtt is tesztelhető a folyamat.
-> - Ha nincs `CRM_WEBHOOK_URL` **vagy** `CRM_WEBHOOK_SECRET` → a CRM-hívás **kimarad**
->   (nem hiba). A CRM-hívás **best-effort** és **független** az n8n-től: a hibája/timeoutja
->   **soha** nem töri meg a form UX-ét, és az n8n flow-t sem érinti.
+> - **A Partner CRM-hez nem kell env változó**: oda a kliens küld közvetlenül, a CRM
+>   nyilvános űrlap-végpontján (`SITE_CONFIG.CRM_FORM_URL`) — lásd a 6. pontot. A korábbi
+>   `CRM_WEBHOOK_URL` / `CRM_WEBHOOK_SECRET` változók **megszűntek**, a Vercelről törölhetők.
 > - Minden változtatás után **Redeploy** szükséges, hogy az env életbe lépjen.
 
 ---
@@ -61,11 +59,12 @@ legyen ugyanaz**.
 
 - `design/index.html` → `SITE_CONFIG.DEMO_MODE = false` (már beállítva): az űrlap valódi
   `POST /api/lead` hívást küld a DEMO-szimuláció helyett.
-- `api/lead.js` (új): validáció → n8n továbbítás → **(csak sikeres kézbesítés után)** Meta CAPI
-  (`Lead` / telefon után `PartialContact`) **+** Partner CRM-továbbítás (független, best-effort).
-  A kliens Pixel `Lead` és a szerver CAPI `Lead` **közös `event_id`**-val megy ki → a Meta dedup­likál.
-  Ha az n8n elbukik (502), **nem megy ki CAPI** → a Meta nem számol be nem érkezett leadet. A CRM-hívás
-  külön HTTP-kérés a `CRM_WEBHOOK_URL`-re (`X-Webhook-Secret` fejléc), az n8n hívás **érintetlen**.
+- `design/index.html` → `SITE_CONFIG.CRM_FORM_URL`: a Partner CRM nyilvános űrlap-végpontja.
+  **Ez a form „háttere"** — a beküldés sikerét ez a válasz dönti el (lásd 6. pont).
+- `api/lead.js`: validáció → n8n továbbítás → **(csak sikeres kézbesítés után)** Meta CAPI
+  (`Lead` / telefon után `PartialContact`). A kliens Pixel `Lead` és a szerver CAPI `Lead`
+  **közös `event_id`**-val megy ki → a Meta dedup­likál. Ha az n8n elbukik (502), **nem megy ki
+  CAPI** → a Meta nem számol be nem érkezett leadet. A CRM-be innen **nem** megy hívás.
 - `vercel.json`: a `/api/*` útvonal explicit átengedve (a statikus rewrite nem érinti).
 - **Honeypot anti-spam:** a formban rejtett `website` mező; ha kitöltött (bot), a szerver
   csendben `200`-at ad és **nem** továbbít.
@@ -79,7 +78,9 @@ legyen ugyanaz**.
 2. [ ] `META_PIXEL_ID` + `META_CAPI_ACCESS_TOKEN` beállítva a Vercelen (Production).
 3. [ ] n8n flow kész, `N8N_WEBHOOK_URL` beállítva (Production = production URL, Preview = test URL).
 4. [ ] (Opcionális) `N8N_WEBHOOK_SECRET`, `ALLOWED_ORIGINS`, `META_TEST_EVENT_CODE`.
-4b. [ ] Partner CRM: `CRM_WEBHOOK_URL` + `CRM_WEBHOOK_SECRET` beállítva (a CRM `WEBHOOK_SECRET`-jével azonos).
+4b. [ ] Partner CRM: a `SITE_CONFIG.CRM_FORM_URL` a helyes űrlap-kulcsra mutat
+   (`design/index.html`). Env változó ehhez **nem** kell; a régi `CRM_WEBHOOK_URL` /
+   `CRM_WEBHOOK_SECRET` a Vercelről törölhető.
 5. [ ] **Redeploy**.
 6. [ ] Teszt: űrlap kitöltése → Events Manager **Test events**-ben látszik a `Lead`
    (és telefon után `PartialContact`) — **csak sikeres n8n-kézbesítés után**; az n8n-be megérkezik
@@ -101,47 +102,51 @@ A részleges (telefon utáni) lead: `partial: true`, `forras: "...-partial"`, ü
 
 ---
 
-## 6. Partner CRM payload (független az n8n-től)
+## 6. Partner CRM — nyilvános űrlap-végpont (kliensoldali)
 
-A `/api/lead` az n8n **mellett** egy külön HTTP-kérést is küld a `CRM_WEBHOOK_URL`-re,
-`X-Webhook-Secret: <CRM_WEBHOOK_SECRET>` fejléccel. Az n8n hívás ettől **változatlan**.
+A CRM-be **a böngésző küld közvetlenül**, a CRM saját nyilvános űrlap-végpontján keresztül
+(`SITE_CONFIG.CRM_FORM_URL`). A korábbi szerveroldali webhook-hívás **megszűnt**: ugyanarról a
+leadről második, párhuzamos rekordot hozott létre. Az n8n + CAPI ág ettől **változatlan**.
 
-```jsonc
-{
-  "client_id": "4bba08c3-93ef-4636-9c3a-a2f7d23d1588",   // a célügyfél azonosítója (UUID)
-  "source": "landing_form",
-  "campaign": { "name": "Weboldal űrlap", "utm_source": "...", "utm_medium": "...",
-                "utm_campaign": "...", "utm_content": "...", "utm_term": "..." },
-  "contact": {
-    "full_name": "<nev>", "email": "<email>", "phone": "<telefon>", "company_name": "<ceg>",
-    "custom": {                  // KULCSOK: ^[a-z0-9_]{1,40}$ (ékezet nélküli snake_case)
-      "szektor": "<szektor>",    // a form iparág mezője
-      "terulet": "<terulet>",    // a form felület-méret mezője
-      "utm_source": "...", "utm_medium": "...", "utm_campaign": "...",
-      "utm_content": "...", "utm_term": "...",
-      "fbclid": "...", "gclid": "...",
-      "landing_url": "<a teljes belépő URL>"
-    }
-  }
-}
-```
-> Az azonosítás a `client_id` (és a `contact.email` dedup) alapján történik; `external_lead_id`-t nem küldünk.
+- **Oldalbetöltéskor** egy `GET` adja az űrlap-munkamenetet (`token` + `ts`).
+- **A telefonszám után** részleges mentés megy (`_partial: "1"`), aminek a válasza
+  `submission` + `resume`; ezeket a végleges beküldés `_submission` / `_resume` mezőként viszi
+  magával → **egy leadből egy deal**.
+- **Siker** = `HTTP 2xx` **és** `{ ok: true }`. Csak ezután sül el a Pixel `Lead`, indul az
+  `/api/lead` (n8n → CAPI) hívás, és irányít át az oldal a köszönőoldalra.
+- **`_consent`:** a végpont kötelezően kéri; a designban nincs jelölőnégyzet, a form lábszövege
+  szerint maga a küldés a hozzájárulás, ezért a kliens `_consent: "true"`-t küld.
+- **Bot-védelem:** a végpont eldobja a token kiadása után azonnal érkező beküldést; a kliens
+  kivárja a minimális kitöltési időt, `403`-ra friss tokent kér és **egyszer** újrapróbál.
 
-- **Üres értékű** custom mező **kimarad** (csak a `campaign` blokkban szerepelhet üresen).
-- Az **UTM-ek, `fbclid`/`gclid` és `landing_url`** a CRM-ben „tracking" mezők → **csak
-  operátor/admin** látja, az ügyfél nem.
-- A CRM az e-mail alapján **dedupál**; a custom kulcsokból automatikusan létrehozza a mezőket
-  (a magyar címke a CRM `/admin/fields` felületén átírható).
+**Mezőtérkép (landing → CRM űrlapmező):**
 
-**Gyors önteszt (curl):**
+| Landing mező | CRM mezőkulcs |
+|---|---|
+| `nev` | `last_name` (a CRM-űrlap „Hogy szólítsuk?" mezője — a teljes nevet küldjük) |
+| `email` | `email` |
+| `telefon` | `phone` |
+| `ceg` | `company` |
+| `szektor` | `milyen_szerepben` |
+| `terulet` | `jelenleg_mekkora_osszegben_van_lejart_sz` |
+
+Az UTM-ek, `fbclid`/`gclid`, `landing_url`, `page_url` stb. külön mezőkként mennek át a
+kliens last-touch attribúció-tárolójából.
+
+**Gyors önteszt (curl) — lead létrehozása NÉLKÜL:**
 
 ```bash
-curl -i -X POST "$CRM_WEBHOOK_URL" \
-  -H 'Content-Type: application/json' \
-  -H "X-Webhook-Secret: $CRM_WEBHOOK_SECRET" \
-  -d '{"client_id":"4bba08c3-93ef-4636-9c3a-a2f7d23d1588","source":"landing_form",
-       "campaign":{"name":"Weboldal űrlap teszt","utm_campaign":"tavaszi_2026"},
-       "contact":{"full_name":"Teszt Anna","email":"teszt.anna@example.com","phone":"+36301112233",
-         "custom":{"szektor":"Élelmiszeripar","utm_campaign":"tavaszi_2026"}}}'
-# Elvárt: 201 + { "contact_id": "...", "deal_id": "...", "created_contact": true }
+API="https://partnercrm.leadgensolution.hu/api/public/forms/042b261af69d38431554fd2a534c0ea7"
+T=$(curl -s "$API")
+TOK=$(echo "$T" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+TS=$(echo "$T" | sed -n 's/.*"ts":\([0-9]*\).*/\1/p')
+sleep 3   # a végpont eldobja a token kiadása után AZONNAL érkező beküldést (403)
+
+# Szándékosan érvénytelen e-mail → 422: a lead NEM jön létre, de a mezőkulcsokat ellenőrzi.
+curl -s -X POST "$API" -H 'Content-Type: application/json' -d @- <<EOF
+{"_token":"$TOK","_ts":"$TS","_channel":"embed","_consent":"true",
+ "last_name":"Teszt Anna","email":"ez-nem-email","phone":"+36301112233","company":"Teszt Kft.",
+ "milyen_szerepben":"Élelmiszeripar","jelenleg_mekkora_osszegben_van_lejart_sz":"500-1 000 m2"}
+EOF
+# Elvárt: {"error":"E-mail cím: érvénytelen e-mail cím.","errors":[...]}
 ```

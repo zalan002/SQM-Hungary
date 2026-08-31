@@ -89,10 +89,16 @@ köszönőoldalra).
 
 A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
 
+- **Az űrlap „háttere" a Partner CRM nyilvános űrlap-végpontja** (`SITE_CONFIG.CRM_FORM_URL`):
+  a kliens ide küld közvetlenül — a telefonszám utáni **részleges mentés** resume-tokenje fűzi
+  össze a végleges beküldéssel, így **egy leadből egy deal** lesz. A **design és a lépések
+  változatlanok**. A beküldés sikerét ez a válasz dönti el; a Pixel `Lead`, az `/api/lead` hívás
+  és a köszönőoldalra irányítás csak sikeres CRM-rögzítés után történik.
 - **`api/lead.js`** (Vercel serverless) — validáció → n8n lead-továbbítás → **(csak sikeres
   kézbesítés után)** Meta Conversions API (`Lead` / telefon után `PartialContact`). Kliens Pixel +
   szerver CAPI **közös `event_id`** → dedup. n8n-hiba (502) esetén **nem megy ki CAPI** (nincs túlmérés).
-- **`DEMO_MODE = false`** a `design/index.html`-ben (az űrlap valódi `/api/lead` hívást küld).
+  A CRM-be innen **nem** megy külön webhook-hívás (az dupla rekordot okozott).
+- **`DEMO_MODE = false`** a `design/index.html`-ben (az űrlap valódi hálózati hívásokat küld).
 - **Honeypot** anti-spam mező a formban.
 - **Env változók + élesítési checklist:** [`docs/03-vercel-env.md`](docs/03-vercel-env.md),
   sablon: [`.env.example`](.env.example).

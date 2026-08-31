@@ -4,6 +4,10 @@
    Meta Pixel + Conversions API közös event_id, attribúció (localStorage),
    több lépéses form, telefon utáni részleges mentés, köszönőoldal ?nev=.
    ------------------------------------------------------------
+   A form HÁTTERE a Partner CRM nyilvános űrlap-végpontja (CRM_FORM_URL): a beküldés
+   sikerét ez a válasz dönti el, és a részkitöltés resume-tokenje köti össze a végleges
+   küldéssel (egy leadből egy deal). Az /api/lead (n8n → CAPI) hívás VÁLTOZATLAN.
+   ------------------------------------------------------------
    FONTOS: a META_PIXEL_ID és az /api/lead serverless függvény élesítése
    külön (backend) fázis. DEMO_MODE=true esetén az űrlap UX-e szimulált (nem
    függ a backend válaszától), de a leadet fire-and-forget elküldi a backendnek
@@ -21,6 +25,9 @@
     LEAD_SOURCE_PARTIAL: "leadgen-fb-ipari-padlo-partial",
     PIXEL_CONTENT_NAME: "SQM Hungary ipari padló ajánlatkérés",
     PIXEL_CONTENT_CATEGORY: "facebook-b2b-leadgen-flooring",
+    // Partner CRM nyilvános űrlap-végpont — EZ a form "háttere" (lásd lentebb).
+    CRM_FORM_URL: "https://partnercrm.leadgensolution.hu/api/public/forms/042b261af69d38431554fd2a534c0ea7",
+    CRM_FORM_KEY: "042b261af69d38431554fd2a534c0ea7",
     DEMO_MODE: true                    // <- ÉLESBEN: false
   };
   var CFG = window.SITE_CONFIG;
@@ -197,6 +204,145 @@
   }
   function back() { if (stepIndex > 0) { stepIndex--; render(true); } }
 
+  /* ============================================================
+     A FORM HÁTTERE — Partner CRM nyilvános űrlap-végpont
+     ------------------------------------------------------------
+     Az űrlap designja és lépései VÁLTOZATLANOK; a beküldést a Partner CRM nyilvános
+     űrlap-végpontja fogadja (a korábbi, szerveroldali CRM-webhook HELYETT — így egy
+     leadből egy deal lesz: a részkitöltés resume-tokenje fűzi össze a végleges küldéssel).
+     A Meta-mérés NEM változik: a Pixel `Lead` továbbra is csak SIKERES rögzítés után sül el
+     (a siker mércéje most a CRM válasza), a szerveroldali CAPI pedig változatlanul az
+     /api/lead-ből megy ki, ugyanazzal az event_id-val → dedup. A köszönőoldali
+     `CompleteRegistration` is a megszokott `?cr=` paraméterrel indul, ezért a CRM válaszának
+     saját `redirect` mezőjét szándékosan figyelmen kívül hagyjuk.
+     ============================================================ */
+  var CRM = {
+    URL: CFG.CRM_FORM_URL || "",
+    KEY: CFG.CRM_FORM_KEY || "",
+    // landing mező -> a CRM-űrlap generált mezőkulcsa
+    MAP: { nev:"last_name", email:"email", telefon:"phone", ceg:"company",
+           szektor:"milyen_szerepben", terulet:"jelenleg_mekkora_osszegben_van_lejart_sz" },
+    HP: "website_7b8a47ba",   // a CRM-űrlap saját honeypot mezője
+    ATTR: ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","utm_id",
+           "gclid","fbclid","msclkid","ttclid","li_fat_id",
+           "landing_url","landing_referrer","page_url","page_referrer"],
+    MIN_DWELL_MS: 3000        // a CRM eldobja a token kiadása után azonnal érkező beküldést
+  };
+
+  var crmSessionReq = null, crmResume = null, crmPartialReq = null;
+
+  /* Űrlap-munkamenet (render-token + ts): a CRM ehhez köti a beküldést. Már betöltéskor
+     lekérjük, hogy a küldés pillanatában készen álljon. */
+  function crmSessionGet(force) {
+    if (!CRM.URL) return Promise.resolve(null);
+    if (crmSessionReq && !force) return crmSessionReq;
+    try {
+      crmSessionReq = fetch(CRM.URL, { method:"GET", headers:{ "Accept":"application/json" } })
+        .then(function (r) { return r.json(); })
+        .then(function (t) { return (t && t.token) ? { token:t.token, ts:t.ts, issued:Date.now() } : null; })
+        .catch(function () { return null; });
+    } catch (e) { crmSessionReq = null; return Promise.resolve(null); }
+    // A SIKERTELEN lekérést nem cache-eljük: egy betöltéskori hálózati hiba miatt ne
+    // ragadjon be véglegesen a beküldés — a következő küldés újra megpróbálja.
+    return crmSessionReq.then(function (session) {
+      if (!session) crmSessionReq = null;
+      return session;
+    });
+  }
+  crmSessionGet();
+
+  // Bot-védelem: a tokenhez képest túl gyors beküldést a CRM elutasítja. Élesben ez sosem
+  // várakoztat (a token az oldalbetöltéskor megjön), csak villámgyors kitöltésnél tart pár tizedet.
+  function crmDwell(session) {
+    var w = CRM.MIN_DWELL_MS - (Date.now() - session.issued);
+    return w > 0 ? new Promise(function (done) { setTimeout(done, w); }) : Promise.resolve();
+  }
+
+  /* Csak a kitöltött mezőértékek, CRM-kulcsokkal. */
+  function crmValues() {
+    var v = {};
+    for (var k in CRM.MAP) { var val = String(state[k] || "").trim(); if (val) v[CRM.MAP[k]] = val; }
+    return v;
+  }
+  function crmPayload(extra) {
+    var body = crmValues();
+    body._channel = "embed";
+    body[CRM.HP] = honeypot();
+    // A designban nincs külön jelölőnégyzet: a form lábszövege szerint maga a küldés a
+    // hozzájárulás („A küldéssel elfogadja az Adatkezelési tájékoztatót."), a CRM viszont
+    // kötelező mezőként kéri.
+    body._consent = "true";
+    var a = buildAttributionPayload();
+    CRM.ATTR.forEach(function (k) { if (a[k]) body[k] = String(a[k]); });
+    // Resume-token: a részkitöltés folytatása — enélkül MÁSODIK deal keletkezne.
+    if (crmResume) { body._submission = crmResume.submission; body._resume = crmResume.token; }
+    if (extra) for (var e in extra) body[e] = extra[e];
+    return body;
+  }
+
+  function crmPost(extra, retried) {
+    if (!CRM.URL) return Promise.resolve({ ok:false, skipped:true });
+    return crmSessionGet(!!retried).then(function (session) {
+      if (!session) return { ok:false, error:"session" };
+      return crmDwell(session).then(function () {
+        var body = crmPayload(extra);
+        body._token = session.token; body._ts = String(session.ts);
+        return fetch(CRM.URL, { method:"POST", headers:{ "Content-Type":"application/json", "Accept":"application/json" },
+                                body: JSON.stringify(body) })
+          .then(function (r) {
+            return r.json().catch(function () { return {}; })
+              .then(function (j) { return { ok: r.ok && !!j.ok, status:r.status, j:j }; });
+          });
+      });
+    }).then(function (res) {
+      // Lejárt/érvénytelen űrlap-munkamenet → friss token, EGY újrapróbálkozás.
+      if (!res.ok && res.status === 403 && !retried) return crmPost(extra, true);
+      return res;
+    }).catch(function () { return { ok:false, error:"network" }; });
+  }
+
+  function crmErrorText(res) {
+    // A munkamenet-hibát a saját (magázó) szövegünkkel írjuk ki; a mezőhibákat a CRM adja.
+    if (res.status === 403) return "A biztonsági munkamenet lejárt. Kérjük, töltse újra az oldalt, és próbálja újra.";
+    return (res.j && res.j.error) || null;
+  }
+
+  /* A beágyazó oldal ebből süthetne el saját eseményt. A Pixel-mérés az app.js-ben történik,
+     ezért ezek a hook-ok szándékosan NEM mérnek — különben duplán számolna. */
+  function crmEmit(type, values) {
+    try { form.dispatchEvent(new CustomEvent(type, { bubbles:true, detail:{ key:CRM.KEY, values:values } })); } catch (e) {}
+    var fn = (type === "crm-form-partial") ? window.crmFormPartial : window.crmFormSubmitted;
+    if (typeof fn === "function") { try { fn(values, CRM.KEY); } catch (e) {} }
+  }
+
+  /* Végleges beküldés a CRM-be. Megvárja a folyamatban lévő részleges mentést (a resume-token
+     nélkül második deal keletkezne) — de legfeljebb 5 másodpercig, hogy a küldés ne akadjon el. */
+  function crmSubmitFinal() {
+    var ready = crmPartialReq
+      ? Promise.race([crmPartialReq, new Promise(function (r) { setTimeout(r, 5000); })])
+      : Promise.resolve();
+    return ready.then(function () { return crmPost(); }).then(function (res) {
+      if (res.ok) crmEmit("crm-form-submitted", crmValues());
+      return res;
+    });
+  }
+
+  /* /api/lead — n8n továbbítás + szerveroldali Meta CAPI (VÁLTOZATLAN pipeline).
+     wait=true: megvárjuk a választ. Egyébként fire-and-forget, keepalive-val — így az
+     átirányítás sem szakítja meg a kérést. */
+  function postLeadApi(body, wait) {
+    var req;
+    try {
+      req = fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" },
+                                       body: JSON.stringify(body), keepalive: !wait });
+    } catch (e) { return Promise.resolve({ ok:false }); }
+    if (!wait) { req.catch(function () {}); return Promise.resolve({ ok:true }); }
+    return req.then(function (r) { return r.json().then(function (j) { return { ok:r.ok, j:j }; }); });
+  }
+
+  /* Részleges mentés a telefonszám után — MINDKÉT kimenet megmarad: a CRM-be a nyilvános
+     űrlap-végponton (ez adja a resume-tokent), az /api/lead-re pedig változatlanul
+     (n8n + szerveroldali CAPI `PartialContact`). */
   function sendPartial() {
     if (partialSent) return; partialSent = true;
     var body = {
@@ -208,10 +354,14 @@
       event_source_url: location.href,
       attribution: buildAttributionPayload()
     };
-    try {
-      fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(body), keepalive:true }).catch(function(){});
-    } catch (e) {}
+    postLeadApi(body);
+    crmPartialReq = crmPost({ _partial:"1" }).then(function (res) {
+      if (res.ok && res.j && res.j.submission && res.j.resume) {
+        crmResume = { submission:res.j.submission, token:res.j.resume };
+        crmEmit("crm-form-partial", crmValues());
+      }
+      return res;
+    });
   }
 
   function submit() {
@@ -244,21 +394,31 @@
     }
 
     if (CFG.DEMO_MODE) {
-      // Dev/előnézet: a UX szimulált (nem függ a backend válaszától), de a leadet
-      // fire-and-forget elküldjük a backendnek is → az n8n (N8N_WEBHOOK_URL), és ha be van
-      // állítva, a CRM/CAPI is megkapja. keepalive: az átirányítás után is befejeződik.
-      try {
-        fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(body), keepalive:true }).catch(function(){});
-      } catch (e) {}
+      // Dev/előnézet: a UX szimulált (nem függ a válaszoktól), de a leadet a CRM-nek és az
+      // /api/lead-nek is elküldjük fire-and-forget módon → az n8n (és ha be van állítva, a
+      // CAPI), valamint a CRM így a dev/előnézet módban is megkapja.
+      crmSubmitFinal();
+      postLeadApi(body);
       setTimeout(onSuccess, 350);
       return;
     }
 
-    fetch(CFG.API_LEAD_PATH, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json().then(function (j) { return { ok:r.ok, j:j }; }); })
-      .then(function (o) { if (o.ok) onSuccess(); else onError(o.j && o.j.error); })
-      .catch(function () { onError(); });
+    if (!CRM.URL) {
+      // Nincs CRM-form konfigurálva → marad a korábbi működés: az /api/lead a kapu.
+      postLeadApi(body, true)
+        .then(function (o) { if (o.ok) onSuccess(); else onError(o.j && o.j.error); })
+        .catch(function () { onError(); });
+      return;
+    }
+
+    // A CRM válasza a kapu: csak sikeres rögzítés után megy ki a Pixel `Lead`, indul az
+    // /api/lead (n8n → CAPI) hívás és az átirányítás — így nem mérünk olyan konverziót,
+    // ami sehol nem érkezett be.
+    crmSubmitFinal().then(function (res) {
+      if (!res.ok) { onError(crmErrorText(res)); return; }
+      postLeadApi(body);
+      onSuccess();
+    });
   }
 
   elNext.addEventListener("click", next);
