@@ -109,26 +109,46 @@
   var form = document.getElementById("lead-form");
   if (!form) return;
 
+  /* A fő profil továbbra is a céges/ipari lead — a lakossági ág ennek az utolsó opciója.
+     A cégnév-lépést a lakossági ágon kihagyjuk (lásd `skip`), de a CRM `company` mezője és az
+     /api/lead validációja is vár értéket, ezért ilyenkor RES_COMPANY-t küldünk automatikusan. */
+  var RESIDENTIAL = "Lakossági / magánszemély";
+  var RES_COMPANY = "Magánszemély (lakossági)";
+
   var SECTORS = ["Élelmiszeripar","Gyógyszeripar","Logisztika / Raktár",
-                 "Gyártás / Elektronika (ESD)","Autóipar","Vegyipar","Egyéb ipari"];
+                 "Gyártás / Elektronika (ESD)","Autóipar","Vegyipar","Egyéb ipari",
+                 RESIDENTIAL];
   var AREAS = ["100 m² alatt","100–500 m²","500–1 000 m²","1 000–3 000 m²","3 000 m² felett"];
 
-  var STEPS = [
+  var state = { nev:"", email:"", telefon:"", ceg:"", szektor:"", terulet:"" };
+  function isResidential(){ return state.szektor === RESIDENTIAL; }
+
+  /* A szektor-kérdés a cégnév ELÉ került: így a lakossági ügyfél nem ütközik előbb egy
+     kötelező cégnév mezőbe, mint ahol jelezhetné, hogy magánszemély. A telefon utáni
+     részleges mentés helye (3. lépés) NEM változott. */
+  var ALL_STEPS = [
     { key:"nev",     type:"text",  label:"Az Ön neve",            placeholder:"pl. Kovács Péter",   autocomplete:"name",
       validate:function(v){ return v.trim().length>=2 || "Kérjük, adja meg a nevét (min. 2 karakter)."; } },
     { key:"email",   type:"email", label:"E-mail cím",            placeholder:"pl. peter@cegnev.hu", autocomplete:"email",
       validate:function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || "Kérjük, adjon meg egy érvényes e-mail címet."; } },
     { key:"telefon", type:"tel",   label:"Telefonszám",           placeholder:"pl. +36 30 123 4567", autocomplete:"tel",
       validate:function(v){ var d=v.replace(/\D/g,""); return (d.length>=7&&d.length<=15) || "Kérjük, adjon meg egy érvényes telefonszámot."; } },
+    { key:"szektor", type:"radio", label:"Milyen jellegű a projekt?", options:SECTORS,
+      validate:function(v){ return SECTORS.indexOf(v)>=0 || "Kérjük, válasszon egy lehetőséget."; },
+      onSet:function(v){
+        // Lakossági ágon nem kérdezünk cégnevet; iparágra visszaváltva az automata értéket töröljük.
+        if (v === RESIDENTIAL) state.ceg = RES_COMPANY;
+        else if (state.ceg === RES_COMPANY) state.ceg = "";
+      } },
     { key:"ceg",     type:"text",  label:"Cégnév",                placeholder:"pl. Példa Gyártó Kft.", autocomplete:"organization",
+      skip:isResidential,
       validate:function(v){ return v.trim().length>=2 || "Kérjük, adja meg a cég nevét."; } },
-    { key:"szektor", type:"radio", label:"Melyik iparágban dolgoznak?", options:SECTORS,
-      validate:function(v){ return SECTORS.indexOf(v)>=0 || "Kérjük, válasszon egy iparágat."; } },
     { key:"terulet", type:"radio", label:"Mekkora a felület (becsült m²)?", options:AREAS,
       validate:function(v){ return AREAS.indexOf(v)>=0 || "Kérjük, válasszon egy értéket."; } }
   ];
 
-  var state = { nev:"", email:"", telefon:"", ceg:"", szektor:"", terulet:"" };
+  // Az aktuális ághoz (céges / lakossági) tartozó lépések.
+  function steps(){ return ALL_STEPS.filter(function(s){ return !(s.skip && s.skip()); }); }
   function honeypot(){ var el = document.getElementById("lf-hp"); return el ? el.value : ""; }
   var stepIndex = 0, submitting = false, partialSent = false;
   var eventId = generateEventId();
@@ -140,13 +160,15 @@
   var elBar = document.getElementById("progress-bar");
   var elLabel = document.getElementById("progress-label");
 
-  function progressFor(i){ return Math.min(1, 0.18 + 0.82 * (i / STEPS.length)); }
+  function progressFor(i, total){ return Math.min(1, 0.18 + 0.82 * (i / total)); }
 
   function render(focusInput) {
-    var s = STEPS[stepIndex];
+    var S = steps();
+    if (stepIndex > S.length - 1) stepIndex = S.length - 1;   // ág-váltás utáni biztonsági határ
+    var s = S[stepIndex];
     elErr.textContent = "";
-    elBar.style.width = (progressFor(stepIndex) * 100).toFixed(0) + "%";
-    var remaining = STEPS.length - stepIndex;
+    elBar.style.width = (progressFor(stepIndex, S.length) * 100).toFixed(0) + "%";
+    var remaining = S.length - stepIndex;
     elLabel.textContent = stepIndex === 0 ? "Csak néhány kérdés — kb. 30 másodperc."
       : (remaining === 1 ? "Még 1 lépés." : "Még " + remaining + " lépés.");
 
@@ -168,12 +190,13 @@
     elStep.innerHTML = html;
 
     elBack.style.visibility = stepIndex === 0 ? "hidden" : "visible";
-    elNext.textContent = stepIndex === STEPS.length - 1 ? "Ajánlatkérés elküldése" : "Tovább";
+    elNext.textContent = stepIndex === S.length - 1 ? "Ajánlatkérés elküldése" : "Tovább";
 
     if (s.type === "radio") {
       elStep.querySelectorAll('button[role="radio"]').forEach(function (b) {
         b.addEventListener("click", function () {
           state[s.key] = b.getAttribute("data-val");
+          if (s.onSet) s.onSet(state[s.key]);   // pl. céges <-> lakossági ág váltása
           elStep.querySelectorAll('button[role="radio"]').forEach(function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); });
           elErr.textContent = "";
           setTimeout(next, 180); // auto-advance választás után
@@ -192,14 +215,15 @@
 
   function next() {
     if (submitting) return;
-    var s = STEPS[stepIndex];
+    var s = steps()[stepIndex];
     if (s.type !== "radio") { var inp = document.getElementById("lf-input"); if (inp) state[s.key] = inp.value; }
     var res = s.validate(state[s.key] || "");
     if (res !== true) { elErr.textContent = res; return; }
 
     if (s.key === "telefon") sendPartial();
 
-    if (stepIndex < STEPS.length - 1) { stepIndex++; render(true); }
+    // Az onSet átírhatta a lépéslistát (lakossági ág), ezért itt újra lekérjük.
+    if (stepIndex < steps().length - 1) { stepIndex++; render(true); }
     else submit();
   }
   function back() { if (stepIndex > 0) { stepIndex--; render(true); } }

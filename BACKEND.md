@@ -296,9 +296,27 @@ a leadről második, párhuzamos rekordot hozott létre.)
 | `nev` | `last_name` | a CRM-űrlapon ez a „Hogy szólítsuk?" mező — a **teljes nevet** küldjük |
 | `email` | `email` | |
 | `telefon` | `phone` | |
-| `ceg` | `company` | |
-| `szektor` | `milyen_szerepben` | a CRM-űrlap „Melyik iparágban dolgoznak?" mezője |
+| `ceg` | `company` | **lakossági leadnél** a landing automatikusan `„Magánszemély (lakossági)"` értéket küld (a lépés kimarad) |
+| `szektor` | `milyen_szerepben` | a CRM-űrlap „Melyik iparágban dolgoznak?" mezője — a landingen a kérdés szövege „Milyen jellegű a projekt?" |
 | `terulet` | `jelenleg_mekkora_osszegben_van_lejart_sz` | a CRM-űrlap „Mekkora a felület (becsült m²)?" mezője |
+
+> ### ⚠️ Élesítés előtt ellenőrizendő — új szektor-érték (szeptember, lakossági nyitás)
+>
+> A landing a `milyen_szerepben` mezőbe egy **új értéket** is küldhet:
+> **`Lakossági / magánszemély`** (a korábbi 7 ipari opció mellett).
+>
+> **Ha ez a CRM-mező kötött opciólistás (select/radio), akkor az új értéket fel kell venni a
+> Partner CRM űrlap-szerkesztőjében** — különben a végpont a lakossági beküldést
+> mezőhibával elutasíthatja, és a lead elveszik. Ha a mező szabad szöveges, nincs teendő.
+> A nyilvános `GET` végpont csak a `token`-t adja vissza (sémát nem), ezért ezt kívülről nem
+> lehet ellenőrizni — a CRM admin felületén kell megnézni.
+>
+> A `terulet` és a `company` mező **nem kapott új értéket**: az m²-sávok változatlanok, a
+> `company` pedig szabad szöveges mező.
+>
+> **Gyors ellenőrzés élesítés után:** küldj egy teszt-leadet a lakossági ágon
+> (Milyen jellegű a projekt? → „Lakossági / magánszemély"), és nézd meg, hogy megjelenik-e a
+> deal a CRM-ben. Hiba esetén a form a mezőhibát a felhasználónak is kiírja.
 
 > A CRM mezőkulcsai generáltak és **nem beszédesek** (a végpont ezekre validál) — a fenti
 > táblázat a mérvadó; a kliensben a `CRM.MAP` objektum tartalmazza ugyanezt.

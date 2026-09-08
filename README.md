@@ -10,6 +10,14 @@ brief alapján, két fázisban:
 
 > A teljes elemzés és a döntések indoklása: **[`docs/01-elemzes.md`](docs/01-elemzes.md)**.
 
+> **🆕 Szeptember — nyitás a lakossági ügyfelek felé.** A landing fő üzenete és fókusza
+> továbbra is a **céges/ipari (B2B)** lead-generálás, de felkerült a hír: *„Szeptembertől
+> lakossági ügyfeleket is vállalunk, kérjen ajánlatot még ma!"* — felső hír-sávban, külön
+> `#lakossagi` szekcióban (az ipari tartalom után) és az űrlap új
+> **„Lakossági / magánszemély"** szektor-opciójaként. Részletek: a
+> [`docs/01-elemzes.md`](docs/01-elemzes.md) 3. fejezete. ⚠️ Élesítés előtt lásd a
+> [`BACKEND.md`](BACKEND.md) figyelmeztetését az **új CRM szektor-értékről**.
+
 ---
 
 ## Mit nézz meg először?
@@ -121,3 +129,10 @@ A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
 3. **Production (main):** a javítások a `claude/zen-cerf-Lc2gf` ágon vannak; a production
    domainhez `main`-be kell mergelni (külön jóváhagyással).
 4. (Opcionális) Adatkezelési tájékoztató / Impresszum oldalak linkelése a láblécben.
+5. **Lakossági ág — CRM-ellenőrzés:** ha a Partner CRM `milyen_szerepben` mezője kötött
+   opciólistás, fel kell venni bele a **„Lakossági / magánszemély"** értéket, különben a
+   lakossági beküldés elutasítható. Lásd [`BACKEND.md`](BACKEND.md) → Mezőtérkép.
+6. (Opcionális) **Lakossági kép** — a `#lakossagi` szekció jelenleg ikonokkal dolgozik, mert
+   minden meglévő fotó/AI-kép ipari. Egy valós vagy AI-generált lakossági kép (garázs/terasz)
+   erősítené a szekciót; a specifikáció a [`docs/02-kepigeny-tablazat.md`](docs/02-kepigeny-tablazat.md)
+   **AI-13** sora.
