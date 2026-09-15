@@ -285,6 +285,7 @@ p{ margin:0 0 1em; color:var(--muted); }
   font-family:var(--body); background:#fff; color:var(--ink); transition:border-color .15s;
 }
 .field input:focus{ outline:none; border-color:var(--yellow-2); box-shadow:0 0 0 4px rgba(255,201,40,.25); }
+.field-hint{ margin:9px 0 0; font-size:13.5px; line-height:1.45; color:var(--muted-2); }
 .radio-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .radio-grid.one{ grid-template-columns:1fr; }
 .radio-grid button{

@@ -12,9 +12,11 @@ brief alapján, két fázisban:
 
 > **🆕 Szeptember — nyitás a lakossági ügyfelek felé.** A landing fő üzenete és fókusza
 > továbbra is a **céges/ipari (B2B)** lead-generálás, de felkerült a hír: *„Szeptembertől
-> lakossági ügyfeleket is vállalunk, kérjen ajánlatot még ma!"* — felső hír-sávban, külön
-> `#lakossagi` szekcióban (az ipari tartalom után) és az űrlap új
-> **„Lakossági / magánszemély"** szektor-opciójaként. Részletek: a
+> lakossági ügyfeleket is vállalunk, kérjen ajánlatot még ma!"* — felső hír-sávban és külön
+> `#lakossagi` szekcióban (az ipari tartalom után). Az űrlap **egyetlen, elágazás nélküli
+> lépéssorral** kezeli mindkét közönséget: a „Hol van szükség az új padlóra?" kérdés
+> listája ipari és lakossági helyszíneket is tartalmaz, a cégnév pedig opcionális.
+> Részletek: a
 > [`docs/01-elemzes.md`](docs/01-elemzes.md) 3. fejezete. ⚠️ Élesítés előtt lásd a
 > [`BACKEND.md`](BACKEND.md) figyelmeztetését az **új CRM szektor-értékről**.
 
@@ -129,9 +131,9 @@ A backend élesítve, a [`BACKEND.md`](BACKEND.md) pipeline szerint:
 3. **Production (main):** a javítások a `claude/zen-cerf-Lc2gf` ágon vannak; a production
    domainhez `main`-be kell mergelni (külön jóváhagyással).
 4. (Opcionális) Adatkezelési tájékoztató / Impresszum oldalak linkelése a láblécben.
-5. **Lakossági ág — CRM-ellenőrzés:** ha a Partner CRM `milyen_szerepben` mezője kötött
-   opciólistás, fel kell venni bele a **„Lakossági / magánszemély"** értéket, különben a
-   lakossági beküldés elutasítható. Lásd [`BACKEND.md`](BACKEND.md) → Mezőtérkép.
+5. ~~Lakossági ág — CRM-ellenőrzés~~ → **rendben:** a CRM `milyen_szerepben` mezője szabad
+   szöveges és nem kötelező, így a helyszín-lista CRM-oldali teendő nélkül bővíthető. Lásd
+   [`BACKEND.md`](BACKEND.md) → Mezőtérkép.
 6. (Opcionális) **Lakossági kép** — a `#lakossagi` szekció jelenleg ikonokkal dolgozik, mert
    minden meglévő fotó/AI-kép ipari. Egy valós vagy AI-generált lakossági kép (garázs/terasz)
    erősítené a szekciót; a specifikáció a [`docs/02-kepigeny-tablazat.md`](docs/02-kepigeny-tablazat.md)

@@ -76,11 +76,12 @@ function validate(b) {
   if (!isEmail(b.email)) e.push('Kérjük, adjon meg egy érvényes e-mail címet.');
   const pd = digitsOnly(b.telefon);
   if (pd.length < 7 || pd.length > 15) e.push('Kérjük, adjon meg egy érvényes telefonszámot.');
-  if (b.partial !== true) {
-    if (!b.ceg || String(b.ceg).trim().length < 2) e.push('Kérjük, adja meg a cég nevét.');
-    if (!b.szektor) e.push('Kérjük, válasszon iparágat.');
-    if (!b.terulet) e.push('Kérjük, adja meg a terület nagyságát.');
-  }
+  // A `ceg`, `szektor` és `terulet` NEM kötelező: a Partner CRM űrlapján is opcionálisak
+  // (company / milyen_szerepben / m² → required:false), és a CRM válasza a beküldés kapuja.
+  // Ha itt szigorúbbak lennénk, a CRM-be bekerült leadhez NEM menne ki az n8n-továbbítás és
+  // a CAPI `Lead` sem — a lead csendben kiesne a mérésből (a hívás fire-and-forget).
+  // A kliens továbbra is bekéri a helyszínt és a m²-t; ez a validáció csak a kaput tartja
+  // nyitva, nem lazít a form UX-én.
   return e;
 }
 

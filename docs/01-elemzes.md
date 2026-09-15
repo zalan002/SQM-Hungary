@@ -71,15 +71,22 @@ gyártóüzemek, raktárak, élelmiszer- és gyógyszeripari létesítmények, l
 **Kit akarunk másodlagosan (szeptembertől):** magánszemélyek — garázs, beálló, terasz,
 erkély, pince, tároló, műhely, valamint társasházi közös terek.
 
-**Kvalifikáció a formban (a szűrés helyett):**
+**Kvalifikáció a formban (a szűrés helyett) — EGYETLEN lépéssor, elágazás nélkül:**
 
-1. **Szektor / projekt jellege** → az ipari opciók mellett **„Lakossági / magánszemély"** is
-   választható; ez a mező választja szét a két ágat a CRM-ben és a Meta-optimalizációban.
-2. **Cégnév** → csak a céges ágon kötelező. Lakossági választás esetén a lépés **kimarad**,
-   és a `ceg` mező automatikusan `„Magánszemély (lakossági)"` értéket kap (a CRM `company`
-   mezője és az `/api/lead` validációja is vár értéket).
+1. **Helyszín** („Hol van szükség az új padlóra?") → egy lista, amely **mindkét közönséget
+   lefedi**: elöl az ipari terek (gyártócsarnok, raktár, élelmiszer-/gyógyszeripari tér,
+   labor/ESD), utánuk a lakossági terek (garázs, terasz, pince/műhely), végül „Egyéb".
+   Ez a válasz mondja meg az értékesítésnek, melyik ágról van szó — külön kérdés nélkül.
+2. **Cégnév** → **opcionális** (a CRM-en is `required:false`). Magánszemélyként üresen
+   hagyható; a lépés mindenkinél látszik, csak nem kötelező. Így **nincs ág-váltás**:
+   a lépésszám, a haladásjelző és a Meta-funnel mindenkinél azonos.
 3. **Becsült felület (m²)** sávokban → változatlan; a projektméretet továbbra is ez adja
    (a lakossági munkák jellemzően a „100 m² alatt" sávba esnek).
+
+> **Amit ezzel feladunk:** a korábbi kérdés az **iparágat** mérte (Élelmiszeripar, ESD,
+> Vegyipar…), az új a **helyszínt**. A B2B-kvalifikáció egy részét a helyszín-opciók viszik
+> tovább (élelmiszer-/gyógyszeripari tér → HACCP, labor/ESD → vezetőképes rendszer), a
+> finomabb iparági bontás viszont a telefonos egyeztetésre marad.
 
 Ezek a CRM-ben és a Meta-optimalizációban is hasznos kvalifikáló adatok.
 
@@ -169,17 +176,21 @@ kvalifikátorok veszik át):
 | 1 | `nev` | Az Ön neve | text | ≥ 2 karakter | kontakt |
 | 2 | `email` | E-mail cím | email | e-mail formátum | kontakt |
 | 3 | `telefon` | Telefonszám | tel | 7–15 számjegy | kontakt → **itt fut a részleges mentés** |
-| 4 | `szektor` | Milyen jellegű a projekt? | rádió-rács | a felsorolásból | kvalifikáció → **ez választja szét a céges és a lakossági ágat** |
-| 5 | `ceg` | Cégnév | text | ≥ 2 karakter | kvalifikáció — **csak a céges ágon**; lakosságinál a lépés kimarad, az érték automatikusan `Magánszemély (lakossági)` |
+| 4 | `ceg` | Cégnév | text | **opcionális** (üres vagy ≥ 2 karakter) | kvalifikáció — magánszemélyként üresen hagyható |
+| 5 | `szektor` | Hol van szükség az új padlóra? | rádió-rács | a felsorolásból | kvalifikáció → **ez jelzi, hogy ipari vagy lakossági a lead** |
 | 6 | `terulet` | Becsült felület (m²) | rádió-rács | a felsorolásból | kvalifikáció (projektméret) |
 
-> **Sorrend-változás (szeptember):** a szektor-kérdés a **cégnév elé** került, hogy a lakossági
-> ügyfél előbb tudja jelezni, hogy magánszemély, mint hogy kötelező cégnév mezőbe ütközne.
-> A telefon utáni **részleges mentés helye (3. lépés) nem változott**.
+> **A sorrend és a kötelezőség a Partner CRM űrlapját követi** (last_name, email, phone,
+> company, milyen_szerepben, m²). A telefon utáni **részleges mentés helye (3. lépés) nem
+> változott**. A `szektor` kulcs a **drótformátum** neve (CRM `milyen_szerepben`, `/api/lead`,
+> n8n, CAPI `sector`) — a kérdés szövege változott, a kulcs szándékosan nem.
 
-**`SZEKTOR_OPCIOK`:** Élelmiszeripar · Gyógyszeripar · Logisztika / Raktár ·
-Gyártás / Elektronika (ESD) · Autóipar · Vegyipar · Egyéb ipari ·
-**Lakossági / magánszemély** *(új — szeptembertől)*
+**`HELYSZIN_OPCIOK`:** Gyártócsarnok, üzem · Raktár, logisztikai csarnok ·
+Élelmiszer- / gyógyszeripari tér · Labor, tisztatér, ESD-terület · Garázs, beálló ·
+Terasz, erkély · Pince, tároló, műhely · Egyéb
+
+> A CRM-mező szabad szöveges, ezért ez a lista **szabadon bővíthető** az `app.js`
+> `PLACES` tömbjében — CRM-oldali teendő nélkül.
 
 **`TERULET_OPCIOK`:** 100 m² alatt · 100–500 m² · 500–1 000 m² · 1 000–3 000 m² · 3 000 m² felett
 
