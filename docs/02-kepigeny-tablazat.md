@@ -75,6 +75,7 @@ uralja a képet. **Emberek:** ha szerepelnek, sima/semleges munkaruha, arc nem h
 | **AI-10** | Köszönőoldal — megerősítő / „mi a következő lépés" kép | Mérnök/szakértő irodai környezetben **műszaki javaslatot / árajánlatot** állít össze: laptop, padló-alaprajz, kéz a dokumentumon; bizalmat sugárzó, tiszta. | **3:2** | fekvő | 1500×1000 | 🟢 OPCIONÁLIS |
 | **AI-11** | Landing / USP vagy „Minimális leállás" blokk | **Éjszakai/hétvégi kivitelezés működő üzemben**: részben kész fényes padló, néhány szakember dolgozik, a háttérben üzemkész gépsor — a „termelés gyors újraindítása" üzenet. | **3:2** | fekvő | 1500×1000 | 🟡 NICE-TO-HAVE |
 | **AI-12** | Landing / minőség-részlet vagy GYIK | **Csúszásmentes, szemcsézett műgyanta felület makró-közelije**: a szemcseszórás textúrája éles fókuszban, fénylő bevonat. | **1:1** | négyzet | 1200×1200 | 🟡 NICE-TO-HAVE |
+| **AI-13** | Landing / **Lakossági szekció** (`#lakossagi`) — *új, szeptemberi nyitás* | **Igényes családi házas garázs vagy fedett beálló** friss, világosszürke műgyanta padlóval: tiszta, fényes felület, a háttérben rendezett polc/szerszámfal, esetleg egy autó eleje. Otthonos léptékű — **NE gyárcsarnok** legyen, de ugyanaz a prémium, letisztult minőségérzet. | **3:2** | fekvő | 1500×1000 | 🟠 AJÁNLOTT |
 
 > **Megjegyzés a sorrendről:** ha gyorsan kell indulni, a 🔴 + 🟠 jelű képek (AI-01…AI-05)
 > elegendőek; a meglévő valós fotók a többi helyet lefedik. A 🟡/🟢 képek a vizuális
@@ -107,5 +108,6 @@ uralja a képet. **Emberek:** ha szerepelnek, sima/semleges munkaruha, arc nem h
 - **AI-08** — `Chemical plant interior with a chemical-resistant resin floor, pipes and tanks, slight anti-slip texture on the surface, industrial drains, durable look, 3:2.`
 - **AI-09** — `Cinematic wide shot of a flawless glossy light-grey resin floor in a modern factory hall, shallow depth of field, calm empty space on the left for hero text, 16:9.`
 - **AI-10** — `Engineer in a clean office preparing a technical proposal / quote, laptop, floor plan drawing, hand on document, trustworthy and tidy, 3:2.`
+- **AI-13** — `Upscale residential garage or covered carport with a fresh light-grey resin floor, glossy clean surface, tidy shelving or tool wall in the background, front of a car visible, domestic scale (not a factory), premium and uncluttered, 3:2.`
 - **AI-11** — `Resin floor installation at night/weekend inside an operating plant, partly finished glossy floor, a few technicians working, production line ready in the background, 3:2.`
 - **AI-12** — `Macro close-up of an anti-slip broadcast-grained resin floor surface, sharp texture of the grit, glossy coating, 1:1.`

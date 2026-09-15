@@ -81,6 +81,26 @@ p{ margin:0 0 1em; color:var(--muted); }
 .btn--lg{ padding:17px 32px; font-size:17px; }
 .btn[disabled]{ opacity:.5; cursor:not-allowed; transform:none; }
 
+/* ---------- Újdonság-sáv (lakossági nyitás) ---------- */
+.topbar{ background:var(--ink); color:#fff; font-size:14.5px; }
+.topbar .wrap{ display:flex; align-items:center; justify-content:center; gap:14px; padding:10px 20px; flex-wrap:wrap; }
+.topbar p{ margin:0; color:#f2f2f2; }
+.topbar p b{ color:var(--yellow); }
+.topbar-tag{
+  font-family:var(--display); font-size:11.5px; letter-spacing:1.2px; text-transform:uppercase;
+  background:var(--yellow); color:var(--ink); padding:4px 10px; border-radius:999px; white-space:nowrap;
+}
+.topbar-cta{
+  font-family:var(--display); font-size:14px; color:var(--yellow); text-decoration:none;
+  border-bottom:2px solid transparent; white-space:nowrap;
+}
+.topbar-cta:hover{ border-bottom-color:var(--yellow); }
+.nav-new{
+  font-family:var(--display); font-size:10px; letter-spacing:.8px; text-transform:uppercase;
+  background:var(--yellow); color:var(--ink); padding:2px 6px; border-radius:999px;
+  margin-left:5px; vertical-align:middle;
+}
+
 /* ---------- Header ---------- */
 .site-header{
   position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92);
@@ -221,6 +241,31 @@ p{ margin:0 0 1em; color:var(--muted); }
 .sector b{ display:block; font-family:var(--display); font-size:15px; }
 .sector small{ color:var(--muted-2); }
 
+/* ---------- Lakossági szekció (új) ---------- */
+.res-section{ background:var(--bg); scroll-margin-top:80px; }  /* ragadós fejléc alá ne csússzon */
+.res-card{
+  background:linear-gradient(180deg, var(--yellow-soft), #fff 62%);
+  border:2px solid var(--yellow); border-radius:var(--radius-lg);
+  padding:44px; box-shadow:var(--shadow-soft);
+}
+.res-head{ max-width:760px; }
+.res-head h2{ margin-bottom:.35em; }
+.res-head .lead{ color:#3a3a3a; }
+.res-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:30px 0 26px; }
+.res-item{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 18px; box-shadow:var(--shadow-soft); transition:transform .12s;
+}
+.res-item:hover{ transform:translateY(-3px); }
+.res-item .ic{ width:34px; height:34px; margin-bottom:10px; color:var(--ink); }
+.res-item b{ display:block; font-family:var(--display); font-size:15.5px; }
+.res-item small{ color:var(--muted-2); }
+.res-checks{ list-style:none; padding:0; margin:0 0 26px; display:grid; gap:8px; }
+.res-checks li{ font-weight:600; color:#1f1f1f; display:flex; gap:10px; align-items:flex-start; }
+.res-checks .ic{ color:var(--ink); flex:0 0 auto; margin-top:3px; }
+.res-foot{ display:flex; flex-wrap:wrap; gap:12px; }
+.res-note{ margin:16px 0 0; font-size:14px; color:var(--muted-2); }
+
 /* ---------- Form ---------- */
 .form-section{ background:var(--ink); color:#fff; }
 .form-grid{ display:grid; grid-template-columns:1fr .9fr; gap:40px; align-items:stretch; }
@@ -240,6 +285,7 @@ p{ margin:0 0 1em; color:var(--muted); }
   font-family:var(--body); background:#fff; color:var(--ink); transition:border-color .15s;
 }
 .field input:focus{ outline:none; border-color:var(--yellow-2); box-shadow:0 0 0 4px rgba(255,201,40,.25); }
+.field-hint{ margin:9px 0 0; font-size:13.5px; line-height:1.45; color:var(--muted-2); }
 .radio-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .radio-grid.one{ grid-template-columns:1fr; }
 .radio-grid button{
@@ -302,6 +348,8 @@ p{ margin:0 0 1em; color:var(--muted); }
   .grid-4{ grid-template-columns:repeat(2,1fr); }
   .steps{ grid-template-columns:repeat(2,1fr); }
   .sectors-grid{ grid-template-columns:repeat(2,1fr); }
+  .res-grid{ grid-template-columns:repeat(2,1fr); }
+  .res-card{ padding:30px 24px; }
   .stats{ grid-template-columns:repeat(2,1fr); }
   .footer-grid{ grid-template-columns:1fr 1fr; }
   .ty-next{ grid-template-columns:1fr; }
@@ -312,6 +360,13 @@ p{ margin:0 0 1em; color:var(--muted); }
 @media(max-width:560px){
   .grid-3,.grid-2{ grid-template-columns:1fr; }
   .sectors-grid,.grid-4,.steps,.stats{ grid-template-columns:1fr; }
+  .res-grid{ grid-template-columns:1fr; }
+  .res-card{ padding:26px 20px; }
+  .res-foot .btn{ width:100%; }
+  /* Mobilon a sáv ne egyen fel túl sokat a hajtás feletti helyből:
+     a chip elhagyható (a szöveg maga az újdonság), a CTA a szöveg mellé kerül. */
+  .topbar .wrap{ gap:6px 10px; text-align:center; font-size:13.5px; padding:9px 20px; }
+  .topbar-tag{ display:none; }
   .radio-grid{ grid-template-columns:1fr; }
   .section{ padding:52px 0; }
 }

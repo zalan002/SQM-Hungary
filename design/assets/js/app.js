@@ -109,9 +109,20 @@
   var form = document.getElementById("lead-form");
   if (!form) return;
 
-  var SECTORS = ["Élelmiszeripar","Gyógyszeripar","Logisztika / Raktár",
-                 "Gyártás / Elektronika (ESD)","Autóipar","Vegyipar","Egyéb ipari"];
+  /* A kérdéssor a Partner CRM űrlapjához igazodik: ugyanazok a mezők, ugyanabban a
+     sorrendben, ugyanazzal a kötelezőséggel (last_name, email, phone kötelező; company,
+     milyen_szerepben, m² nem). EGYETLEN lépéssor — nincs céges/lakossági elágazás:
+     mindkét közönséget a helyszín-kérdés válaszai fedik le, a cégnév pedig opcionális.
+
+     FIGYELEM: a `szektor` kulcs a DRÓTFORMÁTUM neve (CRM `milyen_szerepben`, /api/lead
+     `szektor`, innen az n8n és a CAPI `sector`). A kérdés SZÖVEGE változott, a kulcsot
+     szándékosan NEM nevezzük át — az törné az n8n-mappelést. */
+  var PLACES = ["Gyártócsarnok, üzem","Raktár, logisztikai csarnok",
+                "Élelmiszer- / gyógyszeripari tér","Labor, tisztatér, ESD-terület",
+                "Garázs, beálló","Terasz, erkély","Pince, tároló, műhely","Egyéb"];
   var AREAS = ["100 m² alatt","100–500 m²","500–1 000 m²","1 000–3 000 m²","3 000 m² felett"];
+
+  var state = { nev:"", email:"", telefon:"", ceg:"", szektor:"", terulet:"" };
 
   var STEPS = [
     { key:"nev",     type:"text",  label:"Az Ön neve",            placeholder:"pl. Kovács Péter",   autocomplete:"name",
@@ -121,14 +132,14 @@
     { key:"telefon", type:"tel",   label:"Telefonszám",           placeholder:"pl. +36 30 123 4567", autocomplete:"tel",
       validate:function(v){ var d=v.replace(/\D/g,""); return (d.length>=7&&d.length<=15) || "Kérjük, adjon meg egy érvényes telefonszámot."; } },
     { key:"ceg",     type:"text",  label:"Cégnév",                placeholder:"pl. Példa Gyártó Kft.", autocomplete:"organization",
-      validate:function(v){ return v.trim().length>=2 || "Kérjük, adja meg a cég nevét."; } },
-    { key:"szektor", type:"radio", label:"Melyik iparágban dolgoznak?", options:SECTORS,
-      validate:function(v){ return SECTORS.indexOf(v)>=0 || "Kérjük, válasszon egy iparágat."; } },
+      hint:"Magánszemélyként hagyja üresen — a Tovább gombbal továbbléphet.",
+      validate:function(v){ var t=v.trim();
+        return t==="" || t.length>=2 || "Kérjük, adja meg a cég nevét (min. 2 karakter)."; } },
+    { key:"szektor", type:"radio", label:"Hol van szükség az új padlóra?", options:PLACES,
+      validate:function(v){ return PLACES.indexOf(v)>=0 || "Kérjük, válasszon egy lehetőséget."; } },
     { key:"terulet", type:"radio", label:"Mekkora a felület (becsült m²)?", options:AREAS,
       validate:function(v){ return AREAS.indexOf(v)>=0 || "Kérjük, válasszon egy értéket."; } }
   ];
-
-  var state = { nev:"", email:"", telefon:"", ceg:"", szektor:"", terulet:"" };
   function honeypot(){ var el = document.getElementById("lf-hp"); return el ? el.value : ""; }
   var stepIndex = 0, submitting = false, partialSent = false;
   var eventId = generateEventId();
@@ -162,7 +173,9 @@
     } else {
       html += '<label for="lf-input">' + s.label + '</label>';
       html += '<input id="lf-input" type="' + s.type + '" inputmode="' + (s.type==="tel"?"tel":(s.type==="email"?"email":"text")) +
-              '" autocomplete="' + (s.autocomplete||"on") + '" placeholder="' + s.placeholder + '" value="' + String(state[s.key]).replace(/"/g,'&quot;') + '">';
+              '" autocomplete="' + (s.autocomplete||"on") + '" placeholder="' + s.placeholder + '" value="' + String(state[s.key]).replace(/"/g,'&quot;') + '"' +
+              (s.hint ? ' aria-describedby="lf-hint"' : '') + '>';
+      if (s.hint) html += '<p class="field-hint" id="lf-hint">' + s.hint + '</p>';
     }
     html += '</div>';
     elStep.innerHTML = html;
@@ -421,7 +434,11 @@
     });
   }
 
-  elNext.addEventListener("click", next);
+  /* A "Tovább" gomb type="submit", ezért a kattintás ÚGYIS kivált egy form-submitet.
+     Ha külön click-figyelőt is kötnénk rá, a next() kétszer futna egy kattintásra —
+     és egy NEM kötelező lépés (cégnév) validációja a második híváskor is átmenne,
+     így a lépés kimaradna. Egyetlen belépési pont: a submit esemény.
+     Ez a szövegmezőkben lenyomott Enterre is működik (implicit submit). */
   elBack.addEventListener("click", back);
   form.addEventListener("submit", function (e) { e.preventDefault(); next(); });
 

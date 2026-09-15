@@ -296,12 +296,32 @@ a leadről második, párhuzamos rekordot hozott létre.)
 | `nev` | `last_name` | a CRM-űrlapon ez a „Hogy szólítsuk?" mező — a **teljes nevet** küldjük |
 | `email` | `email` | |
 | `telefon` | `phone` | |
-| `ceg` | `company` | |
-| `szektor` | `milyen_szerepben` | a CRM-űrlap „Melyik iparágban dolgoznak?" mezője |
+| `ceg` | `company` | a CRM-en **nem kötelező** (`required:false`) — a landingen is opcionális, magánszemélyként üresen hagyható |
+| `szektor` | `milyen_szerepben` | a CRM-űrlap **„Hol van szükség az új padlóra?"** mezője. ⚠️ A `szektor` kulcs a **drótformátum** neve (`/api/lead` → n8n → CAPI `sector`); a kérdés szövege változott, a kulcsot szándékosan **nem** nevezzük át |
 | `terulet` | `jelenleg_mekkora_osszegben_van_lejart_sz` | a CRM-űrlap „Mekkora a felület (becsült m²)?" mezője |
 
-> A CRM mezőkulcsai generáltak és **nem beszédesek** (a végpont ezekre validál) — a fenti
-> táblázat a mérvadó; a kliensben a `CRM.MAP` objektum tartalmazza ugyanezt.
+> ### ✅ Feloldva — a szektor-mező szabad szöveges
+>
+> A CRM-űrlap 2026. szeptemberi pillanatfelvétele szerint a `milyen_szerepben` mező
+> **`type: "text"`, `required: false`**, és **nincs hozzá kötött opciólista** (a kliensoldali
+> `validate()` csak akkor ellenőriz választékot, ha a mezőnek van `opts` tömbje — ennek nincs).
+> Ezért a landing tetszőleges címkét küldhet bele: a rádiógombos válaszok (`PLACES` az
+> `app.js`-ben) szabadon bővíthetők, **CRM-oldali teendő nélkül**.
+>
+> Ugyanez igaz a `jelenleg_mekkora_osszegben_van_lejart_sz` (m²) mezőre is.
+>
+> **Kötelező mezők a CRM-en:** `last_name`, `email`, `phone` és a `_consent`. A `company`,
+> a `milyen_szerepben` és a m² mező **opcionális** — ezért az `api/lead.js` validációja sem
+> szigorúbb ezeknél (lásd lentebb).
+
+### Miért nem kötelező a `ceg` / `szektor` / `terulet` az `api/lead.js`-ben
+
+A beküldés **kapuja a CRM válasza**: ha ott átmegy a lead, de az `/api/lead` 400-zal
+elutasítaná, akkor **nem menne ki sem az n8n-továbbítás, sem a CAPI `Lead`** — a hívás
+fire-and-forget, tehát a látogató ebből semmit nem venne észre, a lead viszont csendben
+kiesne a mérésből. Ezért az `api/lead.js` validációja pontosan a CRM kötelezőségét tükrözi:
+csak `nev`, `email`, `telefon`. A form UX-e ettől nem lazul — a landing továbbra is bekéri
+a helyszínt és a m²-t (rádiógombos, kötelező lépés).
 
 **Attribúció:** a kliens last-touch attribúció-tárolójából (localStorage) a következő kulcsok
 mennek át külön mezőként: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`,

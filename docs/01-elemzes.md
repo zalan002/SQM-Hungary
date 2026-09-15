@@ -39,7 +39,7 @@ szerkezetét és a lead-form logikáját. A **wireframe** (`/wireframe`) és a *
 |---|---|---|
 | **Stratégia** | Nem találják fel újra a spanyolviaszt — működő iparági sztenderdekre, konkurens-mintákra támaszkodnak. | Bevált, „klasszikus" lead-gen landing szerkezet (hero + form + bizonyíték + USP + szektorok). |
 | **Cél** | Az éves forgalom megduplázása; ehhez bejövő leadek kellenek. | Konverzió-orientált oldal, agresszív CTA-elhelyezés. |
-| **Célközönség** | **Nagy multicégek** az elsődleges cél, mellettük nagyobb KKV-k. **Lakossági/magánszemély munkát NEM vállalnak.** | Az űrlapnak **ki kell szűrnie a magánszemélyeket** és **kvalifikálnia a nagy projekteket** (cégnév kötelező, m², iparág). |
+| **Célközönség** | **Nagy multicégek** az elsődleges cél, mellettük nagyobb KKV-k. ~~Lakossági/magánszemély munkát NEM vállalnak.~~ → **FRISSÍTVE (szeptember): lakossági ügyfeleket is vállalnak** (lásd 3. fejezet). | A B2B marad az elsődleges cél és a hero fő üzenete; a lakossági ág **külön, másodlagos sávban** jelenik meg, és az űrlap **kvalifikál** (nem szűr ki). |
 | **Fő szolgáltatás** | Ipari **műgyanta** padló a bevétel túlnyomó része — ezt keresik/ismerik Magyarországon. | A műgyanta legyen a vezető üzenet és a fő hero-téma. |
 | **Speciális anyag** | **PU-cement / poliuretán bevonat** — kevesen ismerik itthon; PVC-s gyártóterületekre (finom összeszerelő, elektronikai gyártás) ideális. | Külön, edukáló szolgáltatás-blokk: „amit más nem kínál". Differenciátor. |
 | **Megkülönböztetők** | Más anyagok használata; **nem** építőipari „benzinkutas" stílus, hanem **kulturált megjelenés és kommunikáció**; multiknak értékes, felépített **rendszerek**; nem kötődnek egyetlen anyaggyártóhoz (a legjobb ár/minőség anyaggal dolgoznak); **forintra, egyedileg kalkulált árajánlat** → árelőny. | „Miért az SQM?" blokk ezekkel az érvekkel. A vizuális megjelenés legyen **prémium, letisztult** (nem olcsó építőipari). |
@@ -55,13 +55,38 @@ szerkezetét és a lead-form logikáját. A **wireframe** (`/wireframe`) és a *
 **Kit akarunk:** ipari ingatlant üzemeltető **cégek** döntéshozói / műszaki vezetői —
 gyártóüzemek, raktárak, élelmiszer- és gyógyszeripari létesítmények, logisztikai központok.
 
-**Kit NEM akarunk:** magánszemély / lakossági (garázs, terasz, lakás).
+> ### ⚠️ FRISSÍTÉS — szeptember: nyitás a lakossági ügyfelek felé
+>
+> A kick-off idején a lakossági munka **kizárás** volt; a megrendelő döntése alapján
+> **szeptembertől lakossági ügyfeleket is vállalunk**. A landing üzenete:
+> *„Szeptembertől lakossági ügyfeleket is vállalunk, kérjen ajánlatot még ma!"*
+>
+> **A B2B/ipari lead marad a fő cél** (hero, referenciák, szektorok, esettanulmányok
+> változatlanul ipari fókuszúak) — a lakossági ág egy **felső hír-sáv**, egy **külön szekció**
+> (`#lakossagi`, az ipari tartalom UTÁN) és az űrlap **utolsó szektor-opciója**.
+>
+> Az űrlap innentől **nem szűr, hanem kvalifikál**: a lakossági lead is beérkezik, de
+> egyértelműen megjelölve, hogy az értékesítés szét tudja választani a két ágat.
 
-**Szűrés a formban (a meeting kifejezett kérése):**
+**Kit akarunk másodlagosan (szeptembertől):** magánszemélyek — garázs, beálló, terasz,
+erkély, pince, tároló, műhely, valamint társasházi közös terek.
 
-1. **Cégnév kötelező mező** → a magánszemélyek nagy része itt lemorzsolódik vagy kiszűrhető.
-2. **Becsült felület (m²)** sávokban → a kis (lakossági) projektek elkülönülnek a nagyoktól.
-3. **Iparág / szektor** → kizárólag ipari opciók; nincs „lakás/családi ház" opció.
+**Kvalifikáció a formban (a szűrés helyett) — EGYETLEN lépéssor, elágazás nélkül:**
+
+1. **Helyszín** („Hol van szükség az új padlóra?") → egy lista, amely **mindkét közönséget
+   lefedi**: elöl az ipari terek (gyártócsarnok, raktár, élelmiszer-/gyógyszeripari tér,
+   labor/ESD), utánuk a lakossági terek (garázs, terasz, pince/műhely), végül „Egyéb".
+   Ez a válasz mondja meg az értékesítésnek, melyik ágról van szó — külön kérdés nélkül.
+2. **Cégnév** → **opcionális** (a CRM-en is `required:false`). Magánszemélyként üresen
+   hagyható; a lépés mindenkinél látszik, csak nem kötelező. Így **nincs ág-váltás**:
+   a lépésszám, a haladásjelző és a Meta-funnel mindenkinél azonos.
+3. **Becsült felület (m²)** sávokban → változatlan; a projektméretet továbbra is ez adja
+   (a lakossági munkák jellemzően a „100 m² alatt" sávba esnek).
+
+> **Amit ezzel feladunk:** a korábbi kérdés az **iparágat** mérte (Élelmiszeripar, ESD,
+> Vegyipar…), az új a **helyszínt**. A B2B-kvalifikáció egy részét a helyszín-opciók viszik
+> tovább (élelmiszer-/gyógyszeripari tér → HACCP, labor/ESD → vezetőképes rendszer), a
+> finomabb iparági bontás viszont a telefonos egyeztetésre marad.
 
 Ezek a CRM-ben és a Meta-optimalizációban is hasznos kvalifikáló adatok.
 
@@ -151,12 +176,21 @@ kvalifikátorok veszik át):
 | 1 | `nev` | Az Ön neve | text | ≥ 2 karakter | kontakt |
 | 2 | `email` | E-mail cím | email | e-mail formátum | kontakt |
 | 3 | `telefon` | Telefonszám | tel | 7–15 számjegy | kontakt → **itt fut a részleges mentés** |
-| 4 | `ceg` | Cégnév | text | ≥ 2 karakter | **kvalifikáció (lakossági szűrés)** |
-| 5 | `szektor` | Iparág / szektor | rádió-rács | a felsorolásból | kvalifikáció |
+| 4 | `ceg` | Cégnév | text | **opcionális** (üres vagy ≥ 2 karakter) | kvalifikáció — magánszemélyként üresen hagyható |
+| 5 | `szektor` | Hol van szükség az új padlóra? | rádió-rács | a felsorolásból | kvalifikáció → **ez jelzi, hogy ipari vagy lakossági a lead** |
 | 6 | `terulet` | Becsült felület (m²) | rádió-rács | a felsorolásból | kvalifikáció (projektméret) |
 
-**`SZEKTOR_OPCIOK`:** Élelmiszeripar · Gyógyszeripar · Logisztika / Raktár ·
-Gyártás / Elektronika (ESD) · Autóipar · Vegyipar · Egyéb ipari
+> **A sorrend és a kötelezőség a Partner CRM űrlapját követi** (last_name, email, phone,
+> company, milyen_szerepben, m²). A telefon utáni **részleges mentés helye (3. lépés) nem
+> változott**. A `szektor` kulcs a **drótformátum** neve (CRM `milyen_szerepben`, `/api/lead`,
+> n8n, CAPI `sector`) — a kérdés szövege változott, a kulcs szándékosan nem.
+
+**`HELYSZIN_OPCIOK`:** Gyártócsarnok, üzem · Raktár, logisztikai csarnok ·
+Élelmiszer- / gyógyszeripari tér · Labor, tisztatér, ESD-terület · Garázs, beálló ·
+Terasz, erkély · Pince, tároló, műhely · Egyéb
+
+> A CRM-mező szabad szöveges, ezért ez a lista **szabadon bővíthető** az `app.js`
+> `PLACES` tömbjében — CRM-oldali teendő nélkül.
 
 **`TERULET_OPCIOK`:** 100 m² alatt · 100–500 m² · 500–1 000 m² · 1 000–3 000 m² · 3 000 m² felett
 
